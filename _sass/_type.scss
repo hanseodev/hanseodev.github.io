@@ -19,7 +19,7 @@ h2 {
 }
 
 h3 {
-  margin-top: 1.5rem;
+  margin-top: 1rem;
   font-size: 1.25rem;
 }
 
@@ -36,6 +36,10 @@ p {
 ul, ol, dl {
   margin-top: 0;
   margin-bottom: 1rem;
+}
+
+ul, ol, dl.home {
+  list-style: none;
 }
 
 dt {
