@@ -6,14 +6,14 @@ title: 심당이 재고 계산기 beta
 <p>1번 세트<br><input type="text" pattern="\d*" id="num1"></p>
 <p>3번 세트<br><input type="text" pattern="\d*" id="num2"></p> 
 <p>5번 세트<br><input type="text" pattern="\d*" id="num3"></p>
-<p>7번 세트<br><input type="text" pattern="\d*" id="num4"></p>
+<p>7번 세트<br><input type="text" pattern="\d*" id="num4"></p><br>
 <p>2번 세트<br><input type="text" pattern="\d*" id="num5"></p>
 <p>4번 세트<br><input type="text" pattern="\d*" id="num6"></p>
 <p>6번 세트<br><input type="text" pattern="\d*" id="num7"></p>
-<p>8번 세트<br><input type="text" pattern="\d*" id="num8"></p>
+<p>8번 세트<br><input type="text" pattern="\d*" id="num8"></p><br>
 <p>튀소 30ea<br><input type="text" pattern="\d*" id="num9"></p>
 <p>구마 30ea<br><input type="text" pattern="\d*" id="num10"></p>
-<p>부추 30ea<br><input type="text" pattern="\d*" id="num11"></p>
+<p>부추 30ea<br><input type="text" pattern="\d*" id="num11"></p><br>
 <p>보문산<br><input type="text" pattern="\d*" id="num12"></p>
 
 <button onclick="calculate()">계산하기</button><br><br>

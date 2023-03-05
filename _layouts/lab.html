@@ -1,26 +1,16 @@
 <!DOCTYPE html>
 <html lang="kr-KR" data-theme="dark-poole">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-      
-        <title>
-            {{ page.title }}
-        </title>
-      
-        <link rel="stylesheet" href="{{ 'styles.css' | relative_url }}">
-        <link rel="apple-touch-icon-precomposed" sizes="144x144" href="{{ '/assets/apple-touch-icon-precomposed.png' | relative_url }}">
-        <link rel="shortcut icon" href="{{ '/assets/favicon.ico' | relative_url }}">
-        <link rel="alternate" type="application/atom+xml" title="{{ site.title }}" href="{{ 'atom.xml' | relative_url }}">
-      
-        {% seo title=false %}
-      </head>
-      
+  {% include head.html %}
 
   <body>
+    <div class="container content">
       <main>
-        <h1 class="lab-title">{{ page.title }}</h1>
-        {{ content }}
+        <article class="page">
+            <h1 class="page-title">{{ page.title }}</h1>
+            {{ content }}
+        </article>
       </main>
+    </div>
+
   </body>
 </html>
