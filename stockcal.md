@@ -18,7 +18,7 @@ title: 심당이 재고 계산기 beta
 
 <button onclick="calculate()">계산하기</button><br><br>
 
-<p>결과<br><textarea rows="4" id="result"></textarea></p>
+<p>결과<br><textarea rows="5" id="result"></textarea></p>
 
 <button onclick="copyToClipboard()">클립보드에 복사</button>
 
