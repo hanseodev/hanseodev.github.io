@@ -3,6 +3,8 @@ layout: lab
 title: 심당이 재고 계산기 beta
 ---
 
+<small>✨품목 없으면 비워두지 말고 '0'으로 작성해주세요✨</small>
+
 <label for="num1">1번 튀소</label>
 <input type="text" pattern="\d*" id="num1" style="width: 4rem;"><br>
 <label for="num2">3번 반반</label>
@@ -40,9 +42,14 @@ title: 심당이 재고 계산기 beta
 
 <button onclick="calculate()">계산하기</button><br>
 
+
 <textarea rows="5" id="result"></textarea>
 
 <button onclick="copyToClipboard()">클립보드에 복사</button>
+
+<small>23/04/04 업데이트: 현재 시각을 자동으로 출력합니다</small>
+
+
 
 <script>
     function calculate() {
@@ -67,7 +74,30 @@ title: 심당이 재고 계산기 beta
     var stockBuchu = num2 * 3 + num4 * 2 + num6 * 6 + num8 * 4 + num11 * 30 + num15;
     var stockMeari = num12;
 
-    var result = "시 재고입니다" + "\n튀소 " + stockTuiso + "\n구마 " + stockGuma + "\n부추 " + stockBuchu+ "\n메아리 " + stockMeari
+    // 시간 계산하기
+
+    const now = new Date();
+    const minutes = now.getMinutes();
+
+    let hour;
+    if (minutes >= 40) {
+    hour = now.getHours() + 1;
+    } else {
+    hour = now.getHours();
+    }
+
+    // 12시간제로 변환
+    if (hour > 12) {
+       hour -= 12;
+     }
+    
+    // 시간이 12시인 경우에는 0으로 바꿔줌
+    if (hour == 12) {
+        hour = 12;
+    }
+
+    // 결과값 계산
+    var result = hour + "시 재고입니다" + "\n튀소 " + stockTuiso + "\n구마 " + stockGuma + "\n부추 " + stockBuchu+ "\n메아리 " + stockMeari
 
     // 결과값을 출력
     document.getElementById("result").value = result;
