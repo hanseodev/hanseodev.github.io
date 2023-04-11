@@ -3,7 +3,8 @@ layout: lab
 title: 심당이 재고 계산기 beta
 ---
 
-<small>✨품목 없으면 비워두지 말고 '0'으로 작성해주세요✨</small>
+<small>✨품목 없으면 비워두지 말고 '0'으로 작성해주세요</small><br>
+<small>✨<a href="/donatecal">>> NEW! 나눔 계산기 << </a></small><br>
 
 <label for="num1">1번 튀소</label>
 <input type="text" pattern="\d*" id="num1" style="width: 4rem;"><br>
@@ -42,14 +43,11 @@ title: 심당이 재고 계산기 beta
 
 <button onclick="calculate()">계산하기</button><br>
 
-
 <textarea rows="5" id="result"></textarea>
 
 <button onclick="copyToClipboard()">클립보드에 복사</button>
 
 <small>23/04/04 업데이트: 현재 시각을 자동으로 출력합니다</small>
-
-
 
 <script>
     function calculate() {
