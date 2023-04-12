@@ -81,7 +81,7 @@ title: 심당이 나눔 계산기 beta
 <button onclick="copyFormattedSumDonate()">오늘 나눔 복사</button>
 <button onclick="copyFormattedTotalDonate()">나눔 누계 복사</button><br><br>
 
-<small>✔️<b>23/04/12 업데이트:</b><br>- 빈칸도 계산 가능<br>- 출력값을 자동으로 계산</small><br>
+<small>✔️<b>23/04/12 업데이트:</b><br>- 빈 문자열을 0으로 처리<br>- 출력값을 자동으로 계산</small><br>
 
 <script>
     function calculate() {
