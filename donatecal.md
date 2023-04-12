@@ -58,9 +58,9 @@ title: 심당이 나눔 계산기 beta
 
 <label for="tuiso">튀소</label>
 <input type="text" pattern="\d*" id="tuiso" name="tuiso" oninput="calculate()"><br>
-<label for="guma">부추</label>
+<label for="guma">구마</label>
 <input type="text" pattern="\d*" id="guma" name="guma" oninput="calculate()"><br>
-<label for="buchu">구마</label>
+<label for="buchu">부추</label>
 <input type="text" pattern="\d*" id="buchu" name="buchu" oninput="calculate()"><br>
 <label for="choco">초코</label>
 <input type="text" pattern="\d*" id="choco" name="choco" oninput="calculate()"><br>
