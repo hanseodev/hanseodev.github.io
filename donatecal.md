@@ -64,10 +64,12 @@ title: 심당이 나눔 계산기 beta
 <input type="text" pattern="\d*" id="buchu" name="buchu" oninput="calculate()"><br>
 <label for="choco">초코</label>
 <input type="text" pattern="\d*" id="choco" name="choco" oninput="calculate()"><br>
+<label for="cream">크림</label>
+<input type="text" pattern="\d*" id="cream" name="cream" oninput="calculate()"><br>
 <label for="wheat">건강빵</label>
 <input type="text" pattern="\d*" id="wheat" name="wheat" oninput="calculate()"><br><br>
 
-<label for="preDonate">어제까지 나눔 누계</label><br>
+<label for="preDonate">어제까지 나눔 누계(쉼표 , 빼고 입력)</label><br>
 <input type="text" pattern="\d*" id="preDonate" name="preDonate" oninput="calculate()"><br><br>
 
 <label for="sweet">단과자</label>
@@ -105,13 +107,18 @@ title: 심당이 나눔 계산기 beta
         var guma = parseFloat(document.getElementById("guma").value) || 0;
         var buchu = parseFloat(document.getElementById("buchu").value) || 0;
         var choco = parseFloat(document.getElementById("choco").value) || 0;
+        var cream = parseFloat(document.getElementById("cream").value) || 0;
         var wheat = parseFloat(document.getElementById("wheat").value) || 0;
         var preDonate = parseFloat(document.getElementById("preDonate").value) || 0;
+
+        // 쉼표 제거
+
+        var textWithoutCommasPreDonate = preDonate.replace(/,/g, "");
 
         // Calculation
         
         var sumDonate = donate1 + donate2 + donate3 + donate4 + donate5 + donate6 + donate7 + donate8 + donate9 + donate10 + donate11 + donate12 + donate13 + donate14 + donate15;
-        var sweet = sumDonate - tuiso - guma - buchu - choco - wheat;
+        var sweet = sumDonate - tuiso - guma - buchu - choco - cream - wheat;
         var totalDonate = sumDonate + preDonate;
 
 
