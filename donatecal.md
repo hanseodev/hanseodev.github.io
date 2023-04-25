@@ -69,7 +69,7 @@ title: 심당이 나눔 계산기 beta
 <label for="wheat">건강빵</label>
 <input type="text" pattern="\d*" id="wheat" name="wheat" oninput="calculate()"><br><br>
 
-<label for="preDonate">어제까지 나눔 누계(쉼표 , 빼고 입력)</label><br>
+<label for="preDonate">어제까지 나눔 누계</label><br>
 <input type="text" pattern="\d*" id="preDonate" name="preDonate" oninput="calculate()"><br><br>
 
 <label for="sweet">단과자</label>
@@ -83,6 +83,7 @@ title: 심당이 나눔 계산기 beta
 <button onclick="copyFormattedSumDonate()">오늘 나눔 복사</button>
 <button onclick="copyFormattedTotalDonate()">나눔 누계 복사</button><br><br>
 
+<small>✔️<b>23/04/25 업데이트:</b><br>- 쉼표 포함 금액도 계산</small><br>
 <small>✔️<b>23/04/12 업데이트:</b><br>- 빈 문자열을 0으로 처리<br>- 출력값을 자동으로 계산</small><br>
 
 <script>
@@ -109,17 +110,20 @@ title: 심당이 나눔 계산기 beta
         var choco = parseFloat(document.getElementById("choco").value) || 0;
         var cream = parseFloat(document.getElementById("cream").value) || 0;
         var wheat = parseFloat(document.getElementById("wheat").value) || 0;
-        var preDonate = parseFloat(document.getElementById("preDonate").value) || 0;
+        // var preDonate = parseFloat(document.getElementById("preDonate").value) || 0;
 
         // 쉼표 제거
 
-        var textWithoutCommasPreDonate = preDonate.replace(/,/g, "");
+        let preDonate = document.getElementById("preDonate");
+
+	    var preDonateVal = preDonate.value;
+        var withoutCommasPreDonate = Number(preDonateVal.replace(/,/g, ''));
 
         // Calculation
         
         var sumDonate = donate1 + donate2 + donate3 + donate4 + donate5 + donate6 + donate7 + donate8 + donate9 + donate10 + donate11 + donate12 + donate13 + donate14 + donate15;
         var sweet = sumDonate - tuiso - guma - buchu - choco - cream - wheat;
-        var totalDonate = sumDonate + preDonate;
+        var totalDonate = sumDonate + withoutCommasPreDonate;
 
 
 
