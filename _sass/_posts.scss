@@ -8,7 +8,7 @@
   margin-bottom: 4em;
 
   li + li {
-    margin-top: .25rem;
+    margin-top: 0.25rem;
   }
 }
 
@@ -34,11 +34,10 @@
 // Meta data line below post title
 .post-date {
   display: block;
-  margin-top: -.5rem;
+  margin-top: -0.5rem;
   margin-bottom: var(--spacer);
   color: var(--gray-600);
 }
-
 
 // Related posts
 .related {
