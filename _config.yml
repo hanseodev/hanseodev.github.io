@@ -43,5 +43,4 @@ version: 3.0.0
 nav:
   - title: About
     url: /about
-
-permalink: /:title
+# permalink: /:title
