@@ -44,11 +44,11 @@ title: 심당이 재고 계산기 beta
 <label for="num12">메아리 1ea</label>
 <input type="text" pattern="\d*" id="num12" style="width: 4rem;" oninput="calculate()"><br>
 
-<textarea rows="5" id="result" readonly></textarea>
+<textarea style="width: 12rem; height: 4.5rem;" id="result" readonly></textarea>
 
-<button onclick="copyToClipboard()">클립보드에 복사</button>
+<button style="background-color: #ffffe0; border-radius: 1rem; width: 12rem; height: 3rem; font-size: 1.5rem" onclick="copyToClipboard()">클립보드에 복사</button>
 
-<small><b>✔️23/06/29 업데이트:</b><br>- 메아리 계산기 추가</small><br><br>
+<br><small><b>✔️23/06/29 업데이트:</b><br>- 메아리 계산기 추가<br>- 버튼 스타일 수정</small><br><br>
 <small><b>✔️23/04/12 업데이트:</b><br>- 빈 문자열을 0으로 처리<br>- 출력값을 자동으로 계산</small><br><br>
 <small><b>✔️23/04/04 업데이트:</b><br>- 현재 시각을 자동으로 출력</small>
 
