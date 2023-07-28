@@ -37,14 +37,19 @@ title: 심당이 재고 계산기 beta
 <label for="num15">부추 1ea</label>
 <input type="text" pattern="\d*" id="num15" style="width: 4rem;" oninput="calculate()"><br>
 
-<label for="num12">메아리</label>
+<label for="num16">메아리 계산기</label>
+<input type="text" pattern="\d*" id="num16" style="width: 2rem;" oninput="calculate()"> &times;
+<input type="text" pattern="\d*" id="num17" style="width: 2rem;" oninput="calculate()"> &times;
+<input type="text" pattern="\d*" id="num18" style="width: 2rem;" oninput="calculate()"><br>
+<label for="num12">메아리 1ea</label>
 <input type="text" pattern="\d*" id="num12" style="width: 4rem;" oninput="calculate()"><br>
 
 <textarea rows="5" id="result" readonly></textarea>
 
 <button onclick="copyToClipboard()">클립보드에 복사</button>
 
-<small>✔️<b>23/04/12 업데이트:</b><br>- 빈 문자열을 0으로 처리<br>- 출력값을 자동으로 계산</small><br>
+<small><b>✔️23/06/29 업데이트:</b><br>- 메아리 계산기 추가</small><br><br>
+<small><b>✔️23/04/12 업데이트:</b><br>- 빈 문자열을 0으로 처리<br>- 출력값을 자동으로 계산</small><br><br>
 <small><b>✔️23/04/04 업데이트:</b><br>- 현재 시각을 자동으로 출력</small>
 
 <script>
@@ -64,11 +69,14 @@ title: 심당이 재고 계산기 beta
     var num13 = parseInt(document.getElementById("num13").value) || 0;
     var num14 = parseInt(document.getElementById("num14").value) || 0;
     var num15 = parseInt(document.getElementById("num15").value) || 0;
+    var num16 = parseInt(document.getElementById("num16").value) || 1;
+    var num17 = parseInt(document.getElementById("num17").value) || 1;
+    var num18 = parseInt(document.getElementById("num18").value) || 1;
 
     var stockTuiso = num1 * 6 + num2 * 3 + num3 * 3 + num4 * 2 + num5 * 12 + num6 * 6 + num7 * 6 + num8 * 4 + num9 * 30 + num13;
     var stockGuma = num3 * 3 + num4 * 2 + num7 * 6 + num8 * 4 + num10 * 30 + num14;
     var stockBuchu = num2 * 3 + num4 * 2 + num6 * 6 + num8 * 4 + num11 * 30 + num15;
-    var stockMeari = num12;
+    var stockMeari = num12 + num16 * num17 * num18;
 
     // 시간 계산하기
 
