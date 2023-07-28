@@ -44,11 +44,11 @@ title: 심당이 재고 계산기 beta
 <label for="num12">메아리 1ea</label>
 <input type="text" pattern="\d*" id="num12" style="width: 4rem;" oninput="calculate()"><br>
 
-<textarea style="width: 14rem;" rows=5 id="result" readonly></textarea>
+<textarea style="width: 100%;" rows=5 id="result" readonly></textarea>
 
-<button style="background-color: #ffffe0; border-radius: 1rem; width: 14rem; height: 3rem; font-size: 1.5rem" onclick="copyToClipboard()">클립보드에 복사</button>
+<button style="background-color: #ffffe0; color: 00001f; border-radius: 1rem; width: 100%; height: 3rem; font-size: 1.5rem" onclick="copyToClipboard()">클립보드에 복사</button>
 
-<br><small><b>✔️23/06/29 업데이트:</b><br>- 메아리 계산기 추가<br>- 버튼 스타일 수정</small><br><br>
+<br><small><b>✔️23/06/29 업데이트:</b><br>- 메아리 계산기 추가<br>- 텍스트박스/버튼 스타일 수정</small><br><br>
 <small><b>✔️23/04/12 업데이트:</b><br>- 빈 문자열을 0으로 처리<br>- 출력값을 자동으로 계산</small><br><br>
 <small><b>✔️23/04/04 업데이트:</b><br>- 현재 시각을 자동으로 출력</small>
 
@@ -69,7 +69,7 @@ title: 심당이 재고 계산기 beta
     var num13 = parseInt(document.getElementById("num13").value) || 0;
     var num14 = parseInt(document.getElementById("num14").value) || 0;
     var num15 = parseInt(document.getElementById("num15").value) || 0;
-    var num16 = parseInt(document.getElementById("num16").value) || 1;
+    var num16 = parseInt(document.getElementById("num16").value) || 0;
     var num17 = parseInt(document.getElementById("num17").value) || 1;
     var num18 = parseInt(document.getElementById("num18").value) || 1;
 
