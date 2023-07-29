@@ -1,16 +1,20 @@
 <!DOCTYPE html>
 <html lang="kr-KR" data-theme="dark-poole">
   {% include head.html %}
+  <style>
+    .textbox {
+      touch-action: none;
+    }
+  </style>
 
   <body>
     <div class="container content">
       <main>
         <article class="page">
-            <h1 class="page-title">{{ page.title }}</h1>
-            {{ content }}
+          <h1 class="page-title">{{ page.title }}</h1>
+          {{ content }}
         </article>
       </main>
     </div>
-
   </body>
 </html>
