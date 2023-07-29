@@ -30,6 +30,13 @@ title: 심당이 재고 계산기 beta
 <label for="num11">부추 30ea</label>
 <input type="text" pattern="\d*" id="num11" style="width: 4rem;" oninput="calculate()"><br>
 
+<label for="num19">튀소 15ea</label>
+<input type="text" pattern="\d*" id="num19" style="width: 4rem;" oninput="calculate()"><br>
+<label for="num20">구마 15ea</label>
+<input type="text" pattern="\d*" id="num20" style="width: 4rem;" oninput="calculate()"><br>
+<label for="num21">부추 12ea</label>
+<input type="text" pattern="\d*" id="num21" style="width: 4rem;" oninput="calculate()"><br>
+
 <label for="num13">튀소 1ea</label>
 <input type="text" pattern="\d*" id="num13" style="width: 4rem;" oninput="calculate()"><br>
 <label for="num14">구마 1ea</label>
@@ -48,7 +55,9 @@ title: 심당이 재고 계산기 beta
 
 <button style="background-color: #ffffe0; color: 00001f; border-radius: 1rem; width: 100%; height: 3rem; font-size: 1.5rem" onclick="copyToClipboard()">클립보드에 복사</button>
 
-<br><small><b>✔️23/06/29 업데이트:</b><br>- 메아리 계산기 추가<br>- 텍스트박스/버튼 스타일 수정</small><br><br>
+<br>
+<small><b>✔️23/06/30 업데이트:</b><br>- 15ea, 12ea 단위 추가</small><br><br>
+<small><b>✔️23/06/29 업데이트:</b><br>- 메아리 계산기 추가<br>- 텍스트박스/버튼 스타일 수정</small><br><br>
 <small><b>✔️23/04/12 업데이트:</b><br>- 빈 문자열을 0으로 처리<br>- 출력값을 자동으로 계산</small><br><br>
 <small><b>✔️23/04/04 업데이트:</b><br>- 현재 시각을 자동으로 출력</small>
 
@@ -72,10 +81,13 @@ title: 심당이 재고 계산기 beta
     var num16 = parseInt(document.getElementById("num16").value) || 0;
     var num17 = parseInt(document.getElementById("num17").value) || 1;
     var num18 = parseInt(document.getElementById("num18").value) || 1;
+    var num19 = parseInt(document.getElementById("num19").value) || 0;
+    var num20 = parseInt(document.getElementById("num20").value) || 0;
+    var num21 = parseInt(document.getElementById("num21").value) || 0;
 
-    var stockTuiso = num1 * 6 + num2 * 3 + num3 * 3 + num4 * 2 + num5 * 12 + num6 * 6 + num7 * 6 + num8 * 4 + num9 * 30 + num13;
-    var stockGuma = num3 * 3 + num4 * 2 + num7 * 6 + num8 * 4 + num10 * 30 + num14;
-    var stockBuchu = num2 * 3 + num4 * 2 + num6 * 6 + num8 * 4 + num11 * 30 + num15;
+    var stockTuiso = num1 * 6 + num2 * 3 + num3 * 3 + num4 * 2 + num5 * 12 + num6 * 6 + num7 * 6 + num8 * 4 + num9 * 30 + num19 * 15 + num13;
+    var stockGuma = num3 * 3 + num4 * 2 + num7 * 6 + num8 * 4 + num10 * 30 + num20 * 15 + num14;
+    var stockBuchu = num2 * 3 + num4 * 2 + num6 * 6 + num8 * 4 + num11 * 30 + num21 * 12 + num15;
     var stockMeari = num12 + num16 * num17 * num18;
 
     // 시간 계산하기
