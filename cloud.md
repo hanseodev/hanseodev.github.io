@@ -7,6 +7,10 @@ title: 심당이 문서 공유
 ol {
   list-style-type: decimal;
   }
+
+a {
+    text-decoration-line: none;
+}
 </style>
 
 1. [인턴 면담일지](./assets/cloud/인턴 면담일지.xlsx)
