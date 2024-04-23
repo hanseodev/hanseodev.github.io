@@ -3,6 +3,12 @@ layout: lab
 title: 심당이 문서 공유
 ---
 
+<style>
+ol {
+  list-style-type: decimal;
+  }
+</style>
+
 1. [인턴 면담일지](./assets/cloud/인턴 면담일지.xlsx)
 2. [인턴 무지개프로젝트 평가표](./assets/cloud/인턴 무지개프로젝트 평가표.xlsx)
 3. [AR 명찰 양식](./assets/cloud/AR 명찰 양식.hwp)
