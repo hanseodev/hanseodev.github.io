@@ -25,9 +25,9 @@ function displayProducts(products) {
     productElement.innerHTML = `
             <img src="${product.image}" alt="${product.name} 이미지">
             <div class="product-details">
-                <h2>${product.name}</h2>
-                <p>가격: ${product.price}원</p>
+                <h2>${product.name} <button class="toggle-btn" onclick="toggleDescription(event)">정보</button></h2>
                 <p>${product.description}</p>
+                <p>가격: ${product.price}원</p>
                 <div class="quantity-container">
                     <label for="quantity-${product.name}">수량:</label>
                     <button type="button" onclick="changeQuantity('quantity-${product.name}', -1, '${product.name}')">-</button>
@@ -38,6 +38,20 @@ function displayProducts(products) {
         `;
     productContainer.appendChild(productElement);
   });
+}
+
+// 설명을 토글하는 함수
+function toggleDescription(event) {
+  const button = event.target;
+  const description = button.parentElement.nextElementSibling;
+  if (
+    description.style.display === "none" ||
+    description.style.display === ""
+  ) {
+    description.style.display = "block";
+  } else {
+    description.style.display = "none";
+  }
 }
 
 // 장바구니에 제품을 업데이트하는 함수

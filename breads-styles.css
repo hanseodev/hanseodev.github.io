@@ -40,10 +40,17 @@ h2 {
   flex: 1;
 }
 
-.product-details h2,
+.product-details h2 {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin: 5px 0;
+}
+
 .product-details p {
   margin: 5px 0;
   word-wrap: break-word;
+  display: none;
 }
 
 .quantity-container {
@@ -75,6 +82,20 @@ h2 {
 }
 
 .quantity-container button:hover {
+  background-color: #0056b3;
+}
+
+.toggle-btn {
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 5px 10px;
+  margin-left: 10px;
+}
+
+.toggle-btn:hover {
   background-color: #0056b3;
 }
 
