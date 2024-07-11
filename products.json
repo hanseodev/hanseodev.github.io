@@ -1,0 +1,15 @@
+[
+  {
+    "name": "소금빵",
+    "price": 3000,
+    "description": "바삭하고 고소한 맛의 소금빵입니다.",
+    "image": "/breads-img/saltbread.png"
+  },
+  {
+    "name": "크루아상",
+    "price": 3500,
+    "description": "버터의 풍미가 가득한 크루아상입니다.",
+    "image": "/breads-img/croissant.png"
+  }
+  // 추가 제품을 여기에 추가
+]
