@@ -22,5 +22,11 @@
     "price": 5000,
     "description": "신선한 재료로 만든 맛있는 샌드위치입니다.",
     "image": "/breads-img/sandwich.png"
+  },
+  {
+    "name": "고로케",
+    "price": 4500,
+    "description": "바삭하고 고소한 맛의 고로케입니다.",
+    "image": "/breads-img/korokke.png"
   }
 ]
