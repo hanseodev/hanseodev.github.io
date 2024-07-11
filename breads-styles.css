@@ -63,25 +63,21 @@ h2 {
   border-bottom: 1px solid #ccc;
 }
 
-.quantity-container label {
-  margin-right: 10px;
-}
-
-.quantity-container input {
+.quantity-container input,
+.quantity-container button {
   text-align: center;
-  width: 50px;
+  width: 40px;
+  height: 40px;
   margin: 0 5px;
   border: 1px solid #ccc;
   border-radius: 5px;
-  padding: 5px;
+  padding: 0;
 }
 
 .quantity-container button {
-  padding: 5px 10px;
   background-color: #007bff;
   color: white;
   border: none;
-  border-radius: 5px;
   cursor: pointer;
 }
 
