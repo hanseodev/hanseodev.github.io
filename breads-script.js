@@ -42,3 +42,11 @@ function copyCartToClipboard() {
       console.error("클립보드 복사 실패: ", err);
     });
 }
+
+function changeQuantity(quantityId, delta) {
+  const input = document.getElementById(quantityId);
+  let value = parseInt(input.value);
+  value += delta;
+  if (value < 1) value = 1;
+  input.value = value;
+}
