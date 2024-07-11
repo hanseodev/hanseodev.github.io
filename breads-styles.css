@@ -26,21 +26,24 @@ h2 {
 }
 
 .product img {
-  max-width: 150px;
-  max-height: 150px;
+  width: 150px;
+  height: 150px;
   border-radius: 10px;
   margin-right: 20px;
+  object-fit: cover;
 }
 
 .product-details {
   display: flex;
   flex-direction: column;
   text-align: left;
+  flex: 1;
 }
 
 .product-details h2,
 .product-details p {
   margin: 5px 0;
+  word-wrap: break-word;
 }
 
 .quantity-container {
@@ -99,6 +102,12 @@ button:hover {
 
 #cart li {
   margin: 5px 0;
+}
+
+@media (min-width: 769px) {
+  .product-container {
+    grid-template-columns: repeat(2, 1fr);
+  }
 }
 
 @media (max-width: 768px) {
