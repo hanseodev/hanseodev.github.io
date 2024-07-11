@@ -1,0 +1,43 @@
+body {
+  font-family: Arial, sans-serif;
+  padding: 20px;
+}
+
+h1,
+h2 {
+  text-align: center;
+}
+
+.product {
+  border: 1px solid #ccc;
+  padding: 10px;
+  margin: 10px 0;
+}
+
+.product h2 {
+  margin: 0;
+}
+
+.product p {
+  margin: 5px 0;
+}
+
+label {
+  margin-right: 10px;
+}
+
+button {
+  margin-top: 10px;
+}
+
+#cart {
+  list-style-type: none;
+  padding: 0;
+  margin: 20px 0;
+  border: 1px solid #ccc;
+  padding: 10px;
+}
+
+#cart li {
+  margin: 5px 0;
+}

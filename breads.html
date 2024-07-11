@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>빵집 제품 목록</title>
+    <link rel="stylesheet" href="breads-styles.css" />
+  </head>
+  <body>
+    <h1>빵집 제품 목록</h1>
+    <div class="product" data-name="소금빵" data-price="3000">
+      <h2>소금빵</h2>
+      <p>가격: 3000원</p>
+      <p>바삭하고 고소한 맛의 소금빵입니다.</p>
+      <label for="quantity-saltbread">수량:</label>
+      <input type="number" id="quantity-saltbread" min="1" value="1" />
+      <button onclick="addToCart('소금빵', 'quantity-saltbread')">
+        장바구니 담기
+      </button>
+    </div>
+    <div class="product" data-name="크루아상" data-price="3500">
+      <h2>크루아상</h2>
+      <p>가격: 3500원</p>
+      <p>버터의 풍미가 가득한 크루아상입니다.</p>
+      <label for="quantity-croissant">수량:</label>
+      <input type="number" id="quantity-croissant" min="1" value="1" />
+      <button onclick="addToCart('크루아상', 'quantity-croissant')">
+        장바구니 담기
+      </button>
+    </div>
+
+    <h2>장바구니</h2>
+    <ul id="cart"></ul>
+    <button onclick="copyCartToClipboard()">클립보드에 복사하기</button>
+
+    <script src="breads-script.js"></script>
+  </body>
+</html>
