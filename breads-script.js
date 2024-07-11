@@ -1,6 +1,9 @@
+console.log("breads-script.js loaded"); // JavaScript 파일이 로드되었음을 확인하는 로그
+
 let cart = [];
 
 function addToCart(productName, quantityId) {
+  console.log(`Adding to cart: ${productName}`); // 디버깅을 위한 로그
   const quantity = document.getElementById(quantityId).value;
   const existingProduct = cart.find((item) => item.name === productName);
   if (existingProduct) {
@@ -14,6 +17,7 @@ function addToCart(productName, quantityId) {
 }
 
 function updateCartDisplay() {
+  console.log("Updating cart display"); // 디버깅을 위한 로그
   const cartList = document.getElementById("cart");
   cartList.innerHTML = ""; // 기존 내용을 비움
   cart.forEach((item) => {
@@ -25,6 +29,7 @@ function updateCartDisplay() {
 }
 
 function copyCartToClipboard() {
+  console.log("Copying cart to clipboard"); // 디버깅을 위한 로그
   let cartContent = cart
     .map((item) => `${item.name}: ${item.quantity}개`)
     .join("\n");
