@@ -26,8 +26,8 @@ function displayProducts(products) {
             <img src="${product.image}" alt="${product.name} 이미지">
             <div class="product-details">
                 <h2>${product.name} <button class="toggle-btn" onclick="toggleDescription(event)">정보</button></h2>
-                <p>${product.description}</p>
-                <p>가격: ${product.price}원</p>
+                <p class="description">${product.description}</p>
+                <p class="price">가격: ${product.price}원</p>
                 <div class="quantity-container">
                     <label for="quantity-${product.name}">수량:</label>
                     <button type="button" onclick="changeQuantity('quantity-${product.name}', -1, '${product.name}')">-</button>
