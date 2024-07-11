@@ -22,28 +22,34 @@ h2 {
   width: calc(50% - 40px); /* 50% width minus padding and margin */
   box-sizing: border-box;
   display: flex;
-  flex-direction: column;
   align-items: center;
 }
 
 .product img {
-  max-width: 100%;
+  max-width: 40%;
   border-radius: 10px;
 }
 
 .product-details {
-  text-align: center;
+  flex: 1;
+  margin-left: 20px;
 }
 
-.product h2 {
-  margin: 10px 0;
+.product-details h2 {
+  margin: 0 0 10px 0;
 }
 
-.product p {
+.product-details p {
   margin: 5px 0;
 }
 
-label {
+.quantity-container {
+  display: flex;
+  align-items: center;
+  margin: 10px 0;
+}
+
+.quantity-container label {
   margin-right: 10px;
 }
 
@@ -73,8 +79,33 @@ button:hover {
   margin: 5px 0;
 }
 
+/* PC 환경 */
+@media (min-width: 769px) {
+  .product {
+    width: calc(50% - 40px); /* 50% width minus padding and margin */
+  }
+}
+
+/* 모바일 환경 */
 @media (max-width: 768px) {
   .product {
     width: calc(100% - 40px); /* 100% width minus padding and margin */
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .product img {
+    max-width: 100%;
+    margin-bottom: 10px;
+  }
+
+  .product-details {
+    margin-left: 0;
+    text-align: center;
+    width: 100%;
+  }
+
+  .quantity-container {
+    justify-content: center;
   }
 }
