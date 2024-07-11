@@ -28,7 +28,6 @@ function displayProducts(products) {
                 <h2>${product.name}</h2>
                 <p class="price">${product.price}원</p>
                 <div class="quantity-container">
-                    <label for="quantity-${product.name}">수량:</label>
                     <button type="button" onclick="changeQuantity('quantity-${product.name}', -1, '${product.name}')">-</button>
                     <input type="number" id="quantity-${product.name}" min="0" value="0" onchange="updateCart('${product.name}', 'quantity-${product.name}')">
                     <button type="button" onclick="changeQuantity('quantity-${product.name}', 1, '${product.name}')">+</button>
