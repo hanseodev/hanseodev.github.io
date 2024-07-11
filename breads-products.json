@@ -10,5 +10,17 @@
     "price": 3500,
     "description": "버터의 풍미가 가득한 크루아상입니다.",
     "image": "/breads-img/croissant.png"
+  },
+  {
+    "name": "초코빵",
+    "price": 4000,
+    "description": "진한 초콜릿 맛이 나는 초코빵입니다.",
+    "image": "/breads-img/chocolatebread.png"
+  },
+  {
+    "name": "샌드위치",
+    "price": 5000,
+    "description": "신선한 재료로 만든 맛있는 샌드위치입니다.",
+    "image": "/breads-img/sandwich.png"
   }
 ]
