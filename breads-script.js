@@ -4,9 +4,16 @@ let cart = [];
 
 // JSON 파일에서 제품 데이터를 불러오는 함수
 async function loadProducts() {
-  const response = await fetch("products.json");
-  const products = await response.json();
-  displayProducts(products);
+  try {
+    const response = await fetch("breads-products.json");
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const products = await response.json();
+    displayProducts(products);
+  } catch (error) {
+    console.error("Error loading products:", error);
+  }
 }
 
 // 제품 목록을 화면에 표시하는 함수
