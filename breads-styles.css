@@ -73,7 +73,7 @@ h2 {
   cursor: pointer;
 }
 
-.quantity-container button:hover {
+quantity-container button:hover {
   background-color: #0056b3;
 }
 

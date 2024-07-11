@@ -30,28 +30,27 @@ function displayProducts(products) {
                 <p>${product.description}</p>
                 <div class="quantity-container">
                     <label for="quantity-${product.name}">수량:</label>
-                    <input type="number" id="quantity-${product.name}" min="1" value="1">
-                    <button type="button" onclick="changeQuantity('quantity-${product.name}', -1)">-</button>
-                    <button type="button" onclick="changeQuantity('quantity-${product.name}', 1)">+</button>
+                    <input type="number" id="quantity-${product.name}" min="0" value="0" onchange="updateCart('${product.name}', 'quantity-${product.name}')">
+                    <button type="button" onclick="changeQuantity('quantity-${product.name}', -1, '${product.name}')">-</button>
+                    <button type="button" onclick="changeQuantity('quantity-${product.name}', 1, '${product.name}')">+</button>
                 </div>
-                <button onclick="addToCart('${product.name}', 'quantity-${product.name}')">장바구니 담기</button>
             </div>
         `;
     productContainer.appendChild(productElement);
   });
 }
 
-// 장바구니에 제품을 추가하는 함수
-function addToCart(productName, quantityId) {
-  console.log(`Adding to cart: ${productName}`); // 디버깅을 위한 로그
-  const quantity = document.getElementById(quantityId).value;
+// 장바구니에 제품을 업데이트하는 함수
+function updateCart(productName, quantityId) {
+  const quantity = parseInt(document.getElementById(quantityId).value);
   const existingProduct = cart.find((item) => item.name === productName);
   if (existingProduct) {
-    existingProduct.quantity =
-      parseInt(existingProduct.quantity) + parseInt(quantity);
+    existingProduct.quantity = quantity;
   } else {
-    cart.push({ name: productName, quantity: parseInt(quantity) });
+    cart.push({ name: productName, quantity: quantity });
   }
+  // 수량이 0인 항목은 장바구니에서 제거
+  cart = cart.filter((item) => item.quantity > 0);
   console.log("Cart:", cart); // 디버깅을 위한 콘솔 로그
   updateCartDisplay();
 }
@@ -86,12 +85,13 @@ function copyCartToClipboard() {
 }
 
 // 수량을 변경하는 함수
-function changeQuantity(quantityId, delta) {
+function changeQuantity(quantityId, delta, productName) {
   const input = document.getElementById(quantityId);
   let value = parseInt(input.value);
   value += delta;
-  if (value < 1) value = 1;
+  if (value < 0) value = 0;
   input.value = value;
+  updateCart(productName, quantityId);
 }
 
 // 페이지가 로드되면 제품 데이터를 불러옴
