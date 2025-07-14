@@ -1,6 +1,6 @@
 # Setup
-title: hanseo.me
-url: https://hanseo.me
+title: hanseodev
+url: https://hanseodev.github.io
 paginate: 1
 baseurl: ""
 permalink: pretty
@@ -32,15 +32,12 @@ sass:
 
 # Specify the author for blog posts
 author:
-  name: Jo Hanseo
-  url: hanseo.me
-  email: jo@hanseo.me
+  name:
+  url:
+  email:
 
 # Custom vars
 version: 3.0.0
-
 # Navbar page list
-nav:
-  - title: About
-    url: /about
+
 # permalink: /:title
