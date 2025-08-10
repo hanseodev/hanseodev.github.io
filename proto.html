@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover"
+    />
+    <title>베이커리 쇼핑 프로토타입 — 모바일</title>
+    <style>
+      :root {
+        --gap: 12px;
+        --radius: 14px;
+        --border: #e6e6e6;
+        --text: #222;
+        --muted: #666;
+        --brand: #7c3aed;
+        --bg: #fafafa;
+        --pill: #eee;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      html,
+      body {
+        margin: 0;
+        padding: 0;
+        background: var(--bg);
+        color: var(--text);
+        font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
+          "Noto Sans KR", Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        background: #fff;
+        border-bottom: 1px solid #f0f0f0;
+      }
+      .header-inner {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 16px;
+      }
+      .logo {
+        font-weight: 800;
+        letter-spacing: 0.2px;
+      }
+      .ships {
+        position: sticky;
+        top: 48px;
+        z-index: 45;
+        background: #fff;
+        border-bottom: 1px solid #f3f3f4;
+      }
+      .ships .wrap {
+        display: flex;
+        gap: 8px;
+        padding: 10px 12px;
+        overflow-x: auto;
+      }
+      .ship {
+        flex: 0 0 auto;
+        padding: 10px 14px;
+        border-radius: 999px;
+        border: 1px solid #e8e8ea;
+        background: #f7f7f8;
+        font-size: 14px;
+        color: #444;
+      }
+      .ship[aria-pressed="true"] {
+        background: var(--brand);
+        border-color: var(--brand);
+        color: #fff;
+      }
+      .tabs {
+        position: sticky;
+        top: 94px;
+        z-index: 40;
+        background: #fff;
+        box-shadow: 0 1px 0 #f3f3f4;
+      }
+      .tabs .wrap {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding: 10px 12px;
+      }
+      .tab {
+        flex: 0 0 auto;
+        border: 1px solid #e8e8ea;
+        background: var(--pill);
+        padding: 8px 12px;
+        border-radius: 999px;
+        font-size: 14px;
+        color: #444;
+      }
+      .tab[aria-selected="true"] {
+        background: var(--brand);
+        border-color: var(--brand);
+        color: #fff;
+      }
+      .page {
+        padding: 12px 12px 64px;
+        max-width: 520px;
+        margin: 0 auto;
+      }
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin: 8px 4px 12px;
+      }
+      .section-title h2 {
+        font-size: 18px;
+        margin: 0;
+      }
+      .badge {
+        font-size: 11px;
+        background: #111;
+        color: #fff;
+        border-radius: 999px;
+        padding: 4px 8px;
+      }
+      .sub {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: var(--gap);
+      }
+      .card {
+        background: #fff;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      .thumb img {
+        width: 100%;
+        aspect-ratio: 1/1;
+        object-fit: cover;
+        display: block;
+      }
+      .info {
+        padding: 10px;
+      }
+      .name {
+        font-size: 14px;
+        line-height: 1.3;
+        margin: 0 0 6px;
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .meta {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .price {
+        font-weight: 700;
+      }
+      .loading {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        color: var(--muted);
+        font-size: 13px;
+        padding: 16px;
+      }
+      .dot {
+        width: 6px;
+        height: 6px;
+        border-radius: 50%;
+        background: #d0d0d4;
+        animation: b 0.9s infinite alternate;
+      }
+      .dot:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .dot:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      @keyframes b {
+        from {
+          opacity: 0.3;
+          transform: translateY(0);
+        }
+        to {
+          opacity: 1;
+          transform: translateY(-4px);
+        }
+      }
+      @media (min-width: 768px) {
+        .grid {
+          grid-template-columns: repeat(2, 1fr);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-inner">
+        <div class="logo">Bakery Shop</div>
+      </div>
+    </header>
+    <div class="ships">
+      <div class="wrap">
+        <button class="ship" aria-pressed="true" data-ship="parcel">
+          택배배송
+        </button>
+        <button class="ship" aria-pressed="false" data-ship="daejeon">
+          대전배송
+        </button>
+        <button class="ship" aria-pressed="false" data-ship="pickup">
+          방문수령
+        </button>
+      </div>
+    </div>
+    <nav class="tabs">
+      <div class="wrap">
+        <button class="tab" aria-selected="true" data-cat="bread">빵</button>
+        <button class="tab" aria-selected="false" data-cat="cake">
+          케이크
+        </button>
+        <button class="tab" aria-selected="false" data-cat="roll">
+          롤/파운드
+        </button>
+        <button class="tab" aria-selected="false" data-cat="gift">
+          답례품
+        </button>
+      </div>
+    </nav>
+    <main class="page">
+      <div class="section-title">
+        <h2 id="sectionTitle">빵</h2>
+        <span class="badge">2열 · 무한 스크롤</span>
+        <span id="shipLabel" class="sub">택배배송</span>
+      </div>
+      <div id="grid" class="grid"></div>
+      <div id="sentinel" class="loading">
+        <span class="dot"></span><span class="dot"></span
+        ><span class="dot"></span><span>불러오는 중…</span>
+      </div>
+    </main>
+    <script>
+      const IMG_URL =
+        "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=600";
+      const BASE = {
+        bread: Array(20)
+          .fill()
+          .map((_, i) => ({
+            n: `빵 상품 ${i + 1}`,
+            p: `₩${(i + 1) * 1000}`,
+            img: IMG_URL,
+          })),
+        cake: Array(20)
+          .fill()
+          .map((_, i) => ({
+            n: `케이크 상품 ${i + 1}`,
+            p: `₩${(i + 1) * 2000}`,
+            img: IMG_URL,
+          })),
+        roll: Array(20)
+          .fill()
+          .map((_, i) => ({
+            n: `롤/파운드 상품 ${i + 1}`,
+            p: `₩${(i + 1) * 1500}`,
+            img: IMG_URL,
+          })),
+        gift: Array(20)
+          .fill()
+          .map((_, i) => ({
+            n: `답례품 상품 ${i + 1}`,
+            p: `₩${(i + 1) * 1200}`,
+            img: IMG_URL,
+          })),
+      };
+      const DATA = { parcel: BASE, daejeon: BASE, pickup: BASE };
+      let currentShip = "parcel";
+      let currentCat = "bread";
+      let offset = 0;
+      const PAGE_SIZE = 8;
+      const grid = document.getElementById("grid");
+      const sentinel = document.getElementById("sentinel");
+      const title = document.getElementById("sectionTitle");
+      const shipLabel = document.getElementById("shipLabel");
+      function cardTemplate(item) {
+        return `<article class="card"><div class="thumb"><img src="${item.img}" alt="${item.n}"></div><div class="info"><h3 class="name">${item.n}</h3><div class="meta"><span class="price">${item.p}</span></div></div></article>`;
+      }
+      function renderMore() {
+        const list = DATA[currentShip][currentCat];
+        const slice = list.slice(offset, offset + PAGE_SIZE);
+        if (slice.length === 0) {
+          sentinel.style.display = "none";
+          return;
+        }
+        grid.insertAdjacentHTML("beforeend", slice.map(cardTemplate).join(""));
+        offset += slice.length;
+        if (offset >= list.length) {
+          sentinel.style.display = "none";
+        } else {
+          sentinel.style.display = "flex";
+        }
+      }
+      function resetAndLoad(cat) {
+        currentCat = cat;
+        offset = 0;
+        grid.innerHTML = "";
+        sentinel.style.display = "flex";
+        title.textContent = catTitle(cat);
+        renderMore();
+        window.scrollTo({ top: 0 });
+      }
+      function resetShip(ship) {
+        currentShip = ship;
+        shipLabel.textContent = shipTitle(ship);
+        resetAndLoad(currentCat);
+      }
+      function catTitle(cat) {
+        return cat === "bread"
+          ? "빵"
+          : cat === "cake"
+          ? "케이크"
+          : cat === "roll"
+          ? "롤/파운드"
+          : "답례품";
+      }
+      function shipTitle(ship) {
+        return ship === "parcel"
+          ? "택배배송"
+          : ship === "daejeon"
+          ? "대전배송"
+          : "방문수령";
+      }
+      document.querySelectorAll(".tab").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".tab")
+            .forEach((t) => t.setAttribute("aria-selected", "false"));
+          btn.setAttribute("aria-selected", "true");
+          resetAndLoad(btn.dataset.cat);
+        })
+      );
+      document.querySelectorAll(".ship").forEach((btn) =>
+        btn.addEventListener("click", () => {
+          document
+            .querySelectorAll(".ship")
+            .forEach((s) => s.setAttribute("aria-pressed", "false"));
+          btn.setAttribute("aria-pressed", "true");
+          resetShip(btn.dataset.ship);
+        })
+      );
+      const io = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              setTimeout(renderMore, 150);
+            }
+          });
+        },
+        { root: null, rootMargin: "200px 0px 200px", threshold: 0 }
+      );
+      io.observe(sentinel);
+      resetShip("parcel");
+    </script>
+  </body>
+</html>
