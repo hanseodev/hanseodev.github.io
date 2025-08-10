@@ -6,7 +6,7 @@
       name="viewport"
       content="width=device-width, initial-scale=1, viewport-fit=cover"
     />
-    <title>베이커리 쇼핑 프로토타입 — 모바일</title>
+    <title>쇼핑몰 프로토타입</title>
     <style>
       :root {
         --gap: 12px;
@@ -15,7 +15,7 @@
         --text: #222;
         --muted: #666;
         --brand: #7c3aed;
-        --bg: #fafafa;
+        --bg: #f0f2f5;
         --pill: #eee;
       }
       * {
@@ -30,6 +30,28 @@
         font-family: -apple-system, BlinkMacSystemFont, "Apple SD Gothic Neo",
           "Noto Sans KR", Segoe UI, Roboto, Helvetica, Arial, sans-serif;
       }
+
+      /* iPhone 11 Pro 화면 고정 래퍼 */
+      .phone {
+        width: 375px;
+        height: 812px;
+        margin: 20px auto;
+        border: 1px solid #dcdde1;
+        border-radius: 28px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.12);
+        overflow: auto;
+        background: #fff;
+        position: relative;
+      }
+      .phone::-webkit-scrollbar {
+        width: 8px;
+      }
+      .phone::-webkit-scrollbar-thumb {
+        background: #ddd;
+        border-radius: 999px;
+      }
+
+      /* 상단 영역 */
       header {
         position: sticky;
         top: 0;
@@ -47,6 +69,15 @@
         font-weight: 800;
         letter-spacing: 0.2px;
       }
+      .changer {
+        margin-left: auto;
+        font-size: 12px;
+        background: #f5f5f7;
+        border: 1px solid #ececf0;
+        border-radius: 999px;
+        padding: 6px 10px;
+      }
+
       .ships {
         position: sticky;
         top: 48px;
@@ -74,6 +105,7 @@
         border-color: var(--brand);
         color: #fff;
       }
+
       .tabs {
         position: sticky;
         top: 94px;
@@ -101,9 +133,9 @@
         border-color: var(--brand);
         color: #fff;
       }
+
       .page {
         padding: 12px 12px 64px;
-        max-width: 520px;
         margin: 0 auto;
       }
       .section-title {
@@ -127,6 +159,7 @@
         font-size: 12px;
         color: var(--muted);
       }
+
       .grid {
         display: grid;
         grid-template-columns: repeat(2, 1fr);
@@ -163,6 +196,7 @@
       .price {
         font-weight: 700;
       }
+
       .loading {
         display: flex;
         justify-content: center;
@@ -195,58 +229,173 @@
           transform: translateY(-4px);
         }
       }
+
       @media (min-width: 768px) {
         .grid {
           grid-template-columns: repeat(2, 1fr);
         }
       }
+
+      /* 초기 진입 모달 */
+      .modal {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.35);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 999;
+      }
+      .modal.show {
+        display: flex;
+      }
+      .sheet {
+        width: 100%;
+        max-width: 320px;
+        background: #fff;
+        border-radius: 16px;
+        box-shadow: 0 10px 28px rgba(0, 0, 0, 0.2);
+        overflow: hidden;
+      }
+      .sheet header {
+        position: static;
+        border: none;
+      }
+      .sheet .body {
+        padding: 16px;
+      }
+      .sheet h3 {
+        margin: 0 0 8px;
+        font-size: 18px;
+      }
+      .sheet p {
+        margin: 0 0 12px;
+        color: #555;
+        font-size: 13px;
+      }
+      .choices {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 10px;
+      }
+      .choice {
+        padding: 12px 14px;
+        border-radius: 12px;
+        border: 1px solid #e8e8ea;
+        background: #f7f7f8;
+        font-weight: 700;
+        font-size: 14px;
+      }
+      .choice.primary {
+        background: var(--brand);
+        border-color: var(--brand);
+        color: #fff;
+      }
+      .helper {
+        font-size: 12px;
+        color: #777;
+        margin-top: 8px;
+        text-align: center;
+      }
     </style>
   </head>
   <body>
-    <header>
-      <div class="header-inner">
-        <div class="logo">Bakery Shop</div>
+    <div class="phone">
+      <!-- 초기 배송 방식 선택 모달 -->
+      <div
+        id="shipModal"
+        class="modal"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="modalTitle"
+      >
+        <div class="sheet">
+          <header class="header-inner" style="justify-content: center">
+            <div class="logo">배송 방식 선택</div>
+          </header>
+          <div class="body">
+            <h3 id="modalTitle">수령 방법을 선택해주세요</h3>
+            <p>
+              처음 한 번만 선택하면 다음 접속부터 자동으로 적용돼요. (설정은
+              상단에서 언제든 변경 가능)
+            </p>
+            <div class="choices">
+              <button class="choice primary" data-pick="parcel">
+                택배배송
+              </button>
+              <button class="choice" data-pick="daejeon">대전배송</button>
+              <button class="choice" data-pick="pickup">방문수령</button>
+            </div>
+          </div>
+        </div>
       </div>
-    </header>
-    <div class="ships">
-      <div class="wrap">
-        <button class="ship" aria-pressed="true" data-ship="parcel">
-          택배배송
-        </button>
-        <button class="ship" aria-pressed="false" data-ship="daejeon">
-          대전배송
-        </button>
-        <button class="ship" aria-pressed="false" data-ship="pickup">
-          방문수령
-        </button>
+
+      <header>
+        <div class="header-inner">
+          <div class="logo">Bakery Shop</div>
+          <button
+            id="openShip"
+            class="changer"
+            type="button"
+            aria-haspopup="dialog"
+          >
+            배송 방식 변경
+          </button>
+        </div>
+      </header>
+
+      <div class="ships" role="group" aria-label="배송 방식">
+        <div class="wrap">
+          <button class="ship" aria-pressed="true" data-ship="parcel">
+            택배배송
+          </button>
+          <button class="ship" aria-pressed="false" data-ship="daejeon">
+            대전배송
+          </button>
+          <button class="ship" aria-pressed="false" data-ship="pickup">
+            방문수령
+          </button>
+        </div>
       </div>
+
+      <nav class="tabs" role="tablist" aria-label="카테고리">
+        <div class="wrap">
+          <button class="tab" role="tab" aria-selected="true" data-cat="bread">
+            빵
+          </button>
+          <button class="tab" role="tab" aria-selected="false" data-cat="cake">
+            케이크
+          </button>
+          <button class="tab" role="tab" aria-selected="false" data-cat="roll">
+            롤/파운드
+          </button>
+          <button class="tab" role="tab" aria-selected="false" data-cat="gift">
+            답례품
+          </button>
+        </div>
+      </nav>
+
+      <main class="page">
+        <div class="section-title">
+          <h2 id="sectionTitle">빵</h2>
+          <span class="badge">2열 · 무한 스크롤</span>
+          <span id="shipLabel" class="sub">택배배송</span>
+        </div>
+        <div id="grid" class="grid" aria-live="polite"></div>
+        <div
+          id="sentinel"
+          class="loading"
+          aria-hidden="true"
+          style="opacity: 0.8"
+        >
+          <span class="dot"></span><span class="dot"></span
+          ><span class="dot"></span>
+          <span>불러오는 중…</span>
+        </div>
+      </main>
     </div>
-    <nav class="tabs">
-      <div class="wrap">
-        <button class="tab" aria-selected="true" data-cat="bread">빵</button>
-        <button class="tab" aria-selected="false" data-cat="cake">
-          케이크
-        </button>
-        <button class="tab" aria-selected="false" data-cat="roll">
-          롤/파운드
-        </button>
-        <button class="tab" aria-selected="false" data-cat="gift">
-          답례품
-        </button>
-      </div>
-    </nav>
-    <main class="page">
-      <div class="section-title">
-        <h2 id="sectionTitle">빵</h2>
-        <span class="badge">2열 · 무한 스크롤</span>
-        <span id="shipLabel" class="sub">택배배송</span>
-      </div>
-      <div id="grid" class="grid"></div>
-      <div id="sentinel" class="loading">
-        <span class="dot"></span><span class="dot"></span
-        ><span class="dot"></span><span>불러오는 중…</span>
-      </div>
-    </main>
+
     <script>
       const IMG_URL =
         "https://images.unsplash.com/photo-1608198093002-ad4e005484ec?w=600";
@@ -289,9 +438,14 @@
       const sentinel = document.getElementById("sentinel");
       const title = document.getElementById("sectionTitle");
       const shipLabel = document.getElementById("shipLabel");
+
       function cardTemplate(item) {
-        return `<article class="card"><div class="thumb"><img src="${item.img}" alt="${item.n}"></div><div class="info"><h3 class="name">${item.n}</h3><div class="meta"><span class="price">${item.p}</span></div></div></article>`;
+        return `<article class="card">
+        <div class="thumb"><img src="${item.img}" alt="${item.n}"></div>
+        <div class="info"><h3 class="name">${item.n}</h3><div class="meta"><span class="price">${item.p}</span></div></div>
+      </article>`;
       }
+
       function renderMore() {
         const list = DATA[currentShip][currentCat];
         const slice = list.slice(offset, offset + PAGE_SIZE);
@@ -307,6 +461,7 @@
           sentinel.style.display = "flex";
         }
       }
+
       function resetAndLoad(cat) {
         currentCat = cat;
         offset = 0;
@@ -314,13 +469,24 @@
         sentinel.style.display = "flex";
         title.textContent = catTitle(cat);
         renderMore();
-        window.scrollTo({ top: 0 });
+        document
+          .querySelector(".phone")
+          .scrollTo({ top: 0, behavior: "instant" });
       }
+
       function resetShip(ship) {
         currentShip = ship;
         shipLabel.textContent = shipTitle(ship);
+        // 버튼 상태 동기화
+        document
+          .querySelectorAll(".ship")
+          .forEach((s) => s.setAttribute("aria-pressed", "false"));
+        const active = document.querySelector(`.ship[data-ship="${ship}"]`);
+        active?.setAttribute("aria-pressed", "true");
+        localStorage.setItem("shipMode", ship);
         resetAndLoad(currentCat);
       }
+
       function catTitle(cat) {
         return cat === "bread"
           ? "빵"
@@ -337,24 +503,24 @@
           ? "대전배송"
           : "방문수령";
       }
-      document.querySelectorAll(".tab").forEach((btn) =>
+
+      // 탭/배송 방식 핸들러
+      document.querySelectorAll(".tab").forEach((btn) => {
         btn.addEventListener("click", () => {
           document
             .querySelectorAll(".tab")
             .forEach((t) => t.setAttribute("aria-selected", "false"));
           btn.setAttribute("aria-selected", "true");
           resetAndLoad(btn.dataset.cat);
-        })
-      );
-      document.querySelectorAll(".ship").forEach((btn) =>
+        });
+      });
+      document.querySelectorAll(".ship").forEach((btn) => {
         btn.addEventListener("click", () => {
-          document
-            .querySelectorAll(".ship")
-            .forEach((s) => s.setAttribute("aria-pressed", "false"));
-          btn.setAttribute("aria-pressed", "true");
           resetShip(btn.dataset.ship);
-        })
-      );
+        });
+      });
+
+      // 무한 스크롤 (phone 컨테이너 기준)
       const io = new IntersectionObserver(
         (entries) => {
           entries.forEach((entry) => {
@@ -363,10 +529,46 @@
             }
           });
         },
-        { root: null, rootMargin: "200px 0px 200px", threshold: 0 }
+        {
+          root: document.querySelector(".phone"),
+          rootMargin: "200px 0px 200px",
+          threshold: 0,
+        }
       );
       io.observe(sentinel);
-      resetShip("parcel");
+
+      // 초기 진입: 배송 방식 선택 모달
+      const shipModal = document.getElementById("shipModal");
+      const openShipBtn = document.getElementById("openShip");
+
+      function openShipModal() {
+        shipModal.classList.add("show");
+        // 포커스 이동
+        const first = shipModal.querySelector(".choice");
+        first?.focus();
+      }
+      function closeShipModal() {
+        shipModal.classList.remove("show");
+      }
+
+      shipModal.addEventListener("click", (e) => {
+        if (e.target === shipModal) closeShipModal();
+      });
+      shipModal.querySelectorAll(".choice").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          resetShip(btn.dataset.pick);
+          closeShipModal();
+        });
+      });
+      openShipBtn.addEventListener("click", openShipModal);
+
+      // 저장된 배송 방식 불러오기
+      const saved = localStorage.getItem("shipMode");
+      if (saved) {
+        resetShip(saved);
+      } else {
+        openShipModal();
+      }
     </script>
   </body>
 </html>
