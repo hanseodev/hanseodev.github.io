@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>나눔 계산기</title>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --card: #171a21;
+        --muted: #9097a7;
+        --text: #e7ecf3;
+        --accent: #7dd3fc;
+        --line: #22283a;
+        --good: #86efac;
+        --warn: #facc15;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Pretendard,
+          Apple SD Gothic Neo, Noto Sans KR, sans-serif;
+        background: var(--bg);
+        color: var(--text);
+      }
+      header {
+        position: sticky;
+        top: 0;
+        z-index: 10;
+        backdrop-filter: saturate(1.2) blur(8px);
+        background: color-mix(in lab, var(--bg), transparent 40%);
+        border-bottom: 1px solid var(--line);
+      }
+      header .inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      h1 {
+        font-size: 18px;
+        margin: 0;
+      }
+      main {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 24px 16px 120px;
+      }
+      .grid {
+        display: grid;
+        gap: 16px;
+      }
+      @media (min-width: 920px) {
+        .grid {
+          grid-template-columns: 1.1fr 1fr;
+        }
+      }
+      .card {
+        background: var(--card);
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        padding: 16px;
+      }
+      .card h2 {
+        font-size: 16px;
+        margin: 0 0 10px;
+      }
+      .row {
+        display: grid;
+        grid-template-columns: 160px 1fr auto;
+        gap: 10px;
+        align-items: center;
+        margin: 8px 0;
+      }
+      label {
+        color: var(--muted);
+        font-size: 14px;
+      }
+      input,
+      select,
+      textarea {
+        width: 100%;
+        background: #0c0f14;
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 10px 12px;
+        outline: none;
+      }
+      input[type="checkbox"] {
+        width: auto;
+      }
+      textarea {
+        min-height: 96px;
+        resize: vertical;
+      }
+      .muted {
+        color: var(--muted);
+      }
+      .help {
+        font-size: 12px;
+        color: var(--muted);
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+      th,
+      td {
+        border-bottom: 1px solid var(--line);
+        padding: 8px 6px;
+        font-size: 14px;
+      }
+      th {
+        color: var(--muted);
+        text-align: left;
+        font-weight: 600;
+      }
+      .stack {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      .btns {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+      }
+      button {
+        background: #0c0f14;
+        color: var(--text);
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        padding: 10px 14px;
+        cursor: pointer;
+      }
+      button.primary {
+        background: linear-gradient(180deg, #1f2937, #0c111b);
+        border-color: #263147;
+      }
+      button.accent {
+        background: linear-gradient(180deg, #0ea5e9, #0284c7);
+        border-color: #0369a1;
+      }
+      .pill {
+        display: inline-block;
+        padding: 2px 8px;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        color: var(--muted);
+        font-size: 12px;
+      }
+      .footer {
+        position: fixed;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        border-top: 1px solid var(--line);
+        background: color-mix(in lab, var(--bg), transparent 30%);
+        backdrop-filter: saturate(1.2) blur(8px);
+      }
+      .footer .inner {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 12px 16px;
+        display: flex;
+        gap: 10px;
+      }
+      .mono {
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+          monospace;
+      }
+      .right {
+        margin-left: auto;
+      }
+      .section-title {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        justify-content: space-between;
+      }
+      .section-title small {
+        color: var(--muted);
+      }
+      /* remove number spinners (Chrome/Edge/Safari) */
+      input[type="number"]::-webkit-outer-spin-button,
+      input[type="number"]::-webkit-inner-spin-button {
+        -webkit-appearance: none;
+        margin: 0;
+      }
+      /* remove number spinners (Firefox + modern) */
+      input[type="number"] {
+        -moz-appearance: textfield;
+        appearance: textfield;
+      }
+      /* details summary emphasis */
+      details > summary {
+        font-weight: 700;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 8px 10px;
+        background: #0c0f14;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="inner">
+        <h1>나눔 계산기</h1>
+      </div>
+    </header>
+    <main class="grid">
+      <!-- 좌측: 입력 -->
+      <section class="card">
+        <div class="section-title">
+          <h2>기본 정보</h2>
+          <small id="autosaveStatus" class="help">자동저장 대기</small>
+        </div>
+        <div class="row">
+          <label for="date">날짜</label>
+          <input id="date" type="date" />
+        </div>
+        <div class="row">
+          <label for="dailyNote">일일 보고</label>
+          <textarea id="dailyNote" placeholder="(보고내용)"></textarea>
+          <div></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>매출</h2>
+        <div class="row">
+          <label for="salesBakery">빵집 매출</label
+          ><input
+            id="salesBakery"
+            type="number"
+            inputmode="numeric"
+            placeholder="0"
+          />
+        </div>
+        <div class="row">
+          <label for="salesSand">샌드위치 매출</label
+          ><input
+            id="salesSand"
+            type="number"
+            inputmode="numeric"
+            placeholder="0"
+          />
+        </div>
+        <div class="row">
+          <label>총 매출</label
+          ><input id="salesTotal" class="mono" type="text" readonly />
+          <div class="help" id="salesBreak"></div>
+        </div>
+      </section>
+
+      <section class="card">
+        <h2>나눔(기부)</h2>
+        <table id="donTable">
+          <thead>
+            <tr>
+              <th style="width: 40%">나눔처</th>
+              <th>금액</th>
+              <th style="width: 12%"></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="btns" style="margin-top: 8px">
+          <button id="addDonor">+ 항목 추가</button>
+        </div>
+        <div class="row">
+          <label for="boxes">나눔 박스(1/2 적용)</label
+          ><input id="boxes" type="number" step="0.5" placeholder="" />
+        </div>
+        <div class="row">
+          <label for="yesterdayCum">어제까지 나눔 누계</label
+          ><input id="yesterdayCum" type="number" placeholder="" />
+        </div>
+        <div class="row">
+          <label for="donationCum">당월 나눔 누계</label
+          ><input id="donationCum" type="text" readonly />
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <h2>카테고리 합계</h2>
+        </div>
+        <div class="row">
+          <label for="catDang">단과자</label
+          ><input id="catDang" type="number" placeholder="" /><label
+            class="help"
+            ><input id="catDangSoldOut" type="checkbox" checked /> 매진</label
+          >
+        </div>
+        <div class="row">
+          <label for="catHealth">건강빵</label
+          ><input id="catHealth" type="number" placeholder="" /><label
+            class="help"
+            ><input id="catHealthSoldOut" type="checkbox" checked /> 매진</label
+          >
+        </div>
+        <div class="row">
+          <label for="catSand">샌드위치</label
+          ><input id="catSand" type="number" placeholder="" /><label
+            class="help"
+            ><input id="catSandSoldOut" type="checkbox" checked /> 매진</label
+          >
+        </div>
+        <div class="stack">
+          <details open>
+            <summary>샌드위치 폐기 목록</summary>
+            <table id="sandItems">
+              <thead>
+                <tr>
+                  <th>제품명</th>
+                  <th>수량</th>
+                  <th>단가</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody></tbody>
+            </table>
+            <div class="btns" style="margin-top: 8px">
+              <button id="addSand">+ 항목 추가</button>
+            </div>
+          </details>
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="section-title">
+          <h2>주요 제품 재고/매진</h2>
+          <small class="help">매진 체크 시 수량·단가는 무시</small>
+        </div>
+        <table id="invTable">
+          <thead>
+            <tr>
+              <th style="width: 26%">품목</th>
+              <th style="width: 18%">수량</th>
+              <th style="width: 18%">단가</th>
+              <th style="width: 10%">매진</th>
+              <th style="width: 18%">매진 시각</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <div class="btns" style="margin-top: 8px">
+          <button id="addInv">+ 항목 추가</button>
+        </div>
+      </section>
+
+      <!-- 우측: 출력 -->
+      <section class="card" style="grid-column: 1/-1">
+        <div class="section-title">
+          <h2>보고 내용 미리보기 & 복사</h2>
+          <div class="btns">
+            <button id="gen" class="primary">생성</button>
+            <button id="copy" class="accent">복사하기</button>
+            <button id="clearAll">초기화</button>
+          </div>
+        </div>
+        <textarea
+          id="output"
+          class="mono"
+          style="min-height: 220px"
+          placeholder="[보고 내용이 생성됩니다]"
+        ></textarea>
+        <div class="help" style="margin-top: 6px">
+          필요 시 내용 수정 후 복사하세요.
+        </div>
+      </section>
+    </main>
+
+    <footer class="footer">
+      <div class="inner help">
+        입력값은 브라우저 <b>localStorage</b>에 자동 저장됩니다. 같은
+        PC·브라우저에서 다시 열면 이어서 작성할 수 있어요.
+      </div>
+    </footer>
+
+    <script>
+      // ===== 유틸 =====
+      const $ = (sel) => document.querySelector(sel);
+      const fmt = (n) => (isFinite(n) ? n.toLocaleString("ko-KR") : "");
+      const parseN = (v) => {
+        const n = Number(String(v).replace(/[\,\s]/g, ""));
+        return isFinite(n) ? n : 0;
+      };
+      const fmtWon = (n) => (isFinite(n) ? fmt(n) + "원" : "");
+      const fmtWonSym = (n) => (isFinite(n) ? fmt(n) + "₩" : "");
+      const pad2 = (s) => String(s).padStart(2, "0");
+
+      // 천/백 자리 표시 (하위 4자리 기준)
+      function thousandHundred(n) {
+        const mod = Math.abs(n) % 10000;
+        const t = Math.floor(mod / 1000); // 천의 자리
+        const h = Math.floor((mod % 1000) / 100); // 백의 자리
+        return `${t}천 ${h}백`;
+      }
+      // 억/천만/백만 자리 표시 (상위 3자릿수)
+      function hundredMillionTenMillionMillion(n) {
+        const a = Math.abs(Math.floor(n));
+        const eok = Math.floor(a / 100000000) % 10;
+        const tenM = Math.floor(a / 10000000) % 10;
+        const oneM = Math.floor(a / 1000000) % 10;
+        return `${eok}억 ${tenM}천 ${oneM}백`;
+      }
+      // 시간 정규화: 1900 -> 19:00, 930 -> 09:30
+      function normTime(val) {
+        if (!val) return "";
+        let s = String(val).trim();
+        if (s.includes(":")) {
+          const [h, m = "00"] = s.split(":");
+          return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`;
+        }
+        const d = s.replace(/[^0-9]/g, "");
+        if (d.length === 4) return `${d.slice(0, 2)}:${d.slice(2)}`;
+        if (d.length === 3) return `0${d[0]}:${d.slice(1)}`;
+        if (d.length <= 2) return `${String(d).padStart(2, "0")}:00`;
+        return s;
+      }
+
+      // ===== 초기 데이터 =====
+      const defaultState = {
+        date: "",
+        dailyNote: "",
+        salesBakery: 0,
+        salesSand: 0,
+        boxes: 0,
+        donations: [],
+        yesterdayCum: 0,
+        donationCum: 0,
+        catDang: 0,
+        catDangSoldOut: true,
+        catHealth: 0,
+        catHealthSoldOut: true,
+        catSand: 0,
+        catSandSoldOut: true,
+        sandItems: [],
+        invItems: [
+          { name: "튀소", qty: 0, price: 0, soldOut: true, time: "" },
+          { name: "구마", qty: 0, price: 0, soldOut: true, time: "" },
+          { name: "부추", qty: 0, price: 0, soldOut: true, time: "" },
+          { name: "초코", qty: 0, price: 0, soldOut: true, time: "" },
+          { name: "크리미", qty: 0, price: 0, soldOut: true, time: "" },
+          { name: "", qty: 0, price: 0, soldOut: true, time: "" },
+        ],
+        soldItems: [{ name: "명란바게트", time: "18:30" }],
+      };
+
+      const KEY = "closing_report_v1";
+
+      function loadState() {
+        try {
+          const raw = localStorage.getItem(KEY);
+          if (!raw) return structuredClone(defaultState);
+          const obj = JSON.parse(raw);
+          return { ...structuredClone(defaultState), ...obj };
+        } catch (e) {
+          return structuredClone(defaultState);
+        }
+      }
+      function saveState() {
+        localStorage.setItem(KEY, JSON.stringify(state));
+        $("#autosaveStatus").textContent = "저장됨";
+        setTimeout(
+          () => ($("#autosaveStatus").textContent = "자동저장 대기"),
+          1200
+        );
+      }
+
+      let state = loadState();
+
+      // ===== 폼 바인딩 =====
+      function bindBasic() {
+        $("#date").value = state.date || new Date().toISOString().slice(0, 10);
+        $("#dailyNote").value = state.dailyNote;
+
+        $("#salesBakery").value = state.salesBakery || "";
+        $("#salesSand").value = state.salesSand || "";
+
+        $("#boxes").value = state.boxes || "";
+        $("#yesterdayCum").value = state.yesterdayCum || "";
+        $("#donationCum").value = state.donationCum || "";
+
+        $("#catDang").value = state.catDang || "";
+        $("#catHealth").value = state.catHealth || "";
+        $("#catSand").value = state.catSand || "";
+        $("#catDangSoldOut").checked = !!state.catDangSoldOut;
+        $("#catHealthSoldOut").checked = !!state.catHealthSoldOut;
+        $("#catSandSoldOut").checked = !!state.catSandSoldOut;
+        renderDonations();
+        calcTotals();
+      }
+
+      function onInputSync() {
+        $("#date").addEventListener("input", (e) => {
+          state.date = e.target.value;
+          saveState();
+        });
+        $("#dailyNote").addEventListener("input", (e) => {
+          state.dailyNote = e.target.value;
+          saveState();
+        });
+
+        ["salesBakery", "salesSand"].forEach((id) => {
+          $("#" + id).addEventListener("input", (e) => {
+            state[id] = parseN(e.target.value);
+            calcTotals();
+            saveState();
+          });
+        });
+
+        [
+          "boxes",
+          "yesterdayCum",
+          "donationCum",
+          "catDang",
+          "catHealth",
+          "catSand",
+        ].forEach((id) => {
+          $("#" + id).addEventListener("input", (e) => {
+            state[id] = parseN(e.target.value);
+            saveState();
+          });
+        });
+        $("#catHealthSoldOut").addEventListener("change", (e) => {
+          state.catHealthSoldOut = e.target.checked;
+          saveState();
+        });
+        $("#catDangSoldOut").addEventListener("change", (e) => {
+          state.catDangSoldOut = e.target.checked;
+          saveState();
+        });
+        $("#catSandSoldOut").addEventListener("change", (e) => {
+          state.catSandSoldOut = e.target.checked;
+          saveState();
+        });
+      }
+
+      function calcTotals() {
+        const total =
+          parseN($("#salesBakery").value) + parseN($("#salesSand").value);
+        state.salesTotal = total;
+        $("#salesTotal").value = fmt(total);
+        $("#salesBreak").textContent = `(${hundredMillionTenMillionMillion(
+          total
+        )})`;
+      }
+
+      // ===== 동적 테이블: 샌드위치 세부 =====
+      const sandBody = document.querySelector("#sandItems tbody");
+      function renderSand() {
+        if (!sandBody) return;
+
+        // ✅ sandItems이 비어 있으면 기본 1행 자동 생성
+        if (!state.sandItems || state.sandItems.length === 0) {
+          state.sandItems = [{ name: "", qty: 0, price: 0 }];
+        }
+
+        sandBody.innerHTML = "";
+        state.sandItems.forEach((it, idx) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+      <td><input data-idx="${idx}" data-k="name" value="${
+            it.name
+          }" placeholder="제품명"/></td>
+      <td><input type="number" min="0" step="1" data-idx="${idx}" data-k="qty" value="${
+            it.qty || ""
+          }"/></td>
+      <td><input type="number" min="0" step="100" data-idx="${idx}" data-k="price" value="${
+            it.price || ""
+          }"/></td>
+      <td><button data-idx="${idx}" class="delSand">삭제</button></td>`;
+          sandBody.appendChild(tr);
+        });
+      }
+      sandBody.addEventListener("input", (e) => {
+        const idx = e.target.getAttribute("data-idx");
+        const k = e.target.getAttribute("data-k");
+        if (idx == null || !k) return;
+        const v = k === "name" ? e.target.value : parseN(e.target.value);
+        state.sandItems[idx][k] = v;
+        saveState();
+      });
+      sandBody.addEventListener("click", (e) => {
+        if (e.target.classList.contains("delSand")) {
+          const idx = Number(e.target.getAttribute("data-idx"));
+          state.sandItems.splice(idx, 1);
+          renderSand();
+          saveState();
+        }
+      });
+      $("#addSand").addEventListener("click", () => {
+        state.sandItems.push({ name: "", qty: 0, price: 0 });
+        renderSand();
+        saveState();
+      });
+
+      // ===== 나눔처(고정 A–C + 순차 추가) =====
+      const donBody = document.querySelector("#donTable tbody");
+      function donorNameFromIndex(i) {
+        return `나눔처 ${String.fromCharCode(65 + i)}`;
+      }
+      function ensureFixedABC() {
+        const names = state.donations?.map((d) => d.name) || [];
+        if (!state.donations) {
+          state.donations = [];
+        }
+        ["나눔처 A", "나눔처 B", "나눔처 C"].forEach((nm, i) => {
+          const idx = names.indexOf(nm);
+          if (idx === -1)
+            state.donations.splice(i, 0, { name: nm, amount: 0, fixed: true });
+          else state.donations[idx].fixed = true;
+        });
+      }
+      function nextDonor() {
+        const base = state.donations?.length
+          ? Math.max(3, state.donations.length)
+          : 3;
+        const name = donorNameFromIndex(base);
+        return { name, amount: 0, fixed: false };
+      }
+      function renderDonations() {
+        ensureFixedABC();
+        donBody.innerHTML = "";
+        state.donations.forEach((it, idx) => {
+          const isFixed = !!it.fixed;
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+            <td><input data-idx="${idx}" data-k="name" value="${it.name}" ${
+            isFixed ? "disabled" : ""
+          }/></td>
+            <td><input type="number" min="0" step="100" data-idx="${idx}" data-k="amount" value="${
+            it.amount > 0 ? it.amount : ""
+          }"/></td>
+            <td>${
+              isFixed
+                ? ""
+                : `<button data-idx="${idx}" class="delDon">삭제</button>`
+            }</td>`;
+          donBody.appendChild(tr);
+        });
+        updateDonationCum();
+      }
+      donBody.addEventListener("input", (e) => {
+        const idx = e.target.getAttribute("data-idx");
+        const k = e.target.getAttribute("data-k");
+        if (idx == null || !k) return;
+        const v = k === "name" ? e.target.value : parseN(e.target.value);
+        state.donations[idx][k] = v;
+        saveState();
+        updateDonationCum();
+      });
+      donBody.addEventListener("click", (e) => {
+        if (e.target.classList.contains("delDon")) {
+          const i = Number(e.target.getAttribute("data-idx"));
+          state.donations.splice(i, 1);
+          renderDonations();
+          saveState();
+        }
+      });
+      document.addEventListener("click", (e) => {
+        if (e.target.id === "addDonor") {
+          state.donations.push(nextDonor());
+          renderDonations();
+          saveState();
+        }
+      });
+      function donationsSum() {
+        return (state.donations || []).reduce(
+          (acc, d) => acc + parseN(d.amount),
+          0
+        );
+      }
+      function updateDonationCum() {
+        const sum = donationsSum();
+        const y = parseN($("#yesterdayCum").value);
+        $("#donationCum").value = fmt(sum + y);
+      }
+      $("#yesterdayCum").addEventListener("input", () => {
+        state.yesterdayCum = parseN($("#yesterdayCum").value);
+        updateDonationCum();
+        saveState();
+      });
+
+      // ===== 동적 테이블: 재고 =====
+      const invBody = document.querySelector("#invTable tbody");
+      function renderInv() {
+        invBody.innerHTML = "";
+        state.invItems.forEach((it, idx) => {
+          const tr = document.createElement("tr");
+          tr.innerHTML = `
+  <td><input data-idx="${idx}" data-k="name" value="${it.name}"/></td>
+  <td><input type="number" min="0" step="1" data-idx="${idx}" data-k="qty" value="${
+            it.qty || ""
+          }" ${it.soldOut ? "disabled" : ""}/></td>
+  <td><input type="number" min="0" step="100" data-idx="${idx}" data-k="price" value="${
+            it.price || ""
+          }" ${it.soldOut ? "disabled" : ""}/></td>
+  <td style="text-align:center"><input type="checkbox" data-idx="${idx}" data-k="soldOut" ${
+            it.soldOut ? "checked" : ""
+          }/></td>
+  <td><input data-idx="${idx}" data-k="time" placeholder="HHMM" value="${
+            it.time || ""
+          }"/></td>
+`;
+          invBody.appendChild(tr);
+        });
+      }
+      invBody.addEventListener("input", (e) => {
+        const idx = e.target.getAttribute("data-idx");
+        const k = e.target.getAttribute("data-k");
+        if (idx == null || !k) return;
+        let v;
+        if (k === "soldOut") {
+          v = e.target.checked;
+        } else if (k === "name") {
+          v = e.target.value;
+        } else if (k === "time") {
+          v = normTime(e.target.value);
+        } else {
+          v = parseN(e.target.value);
+        }
+        state.invItems[idx][k] = v;
+        if (k === "soldOut") {
+          renderInv();
+        }
+        saveState();
+      });
+      document.addEventListener("click", (e) => {
+        if (e.target.id === "addInv") {
+          state.invItems.push({
+            name: "",
+            qty: 0,
+            price: 0,
+            soldOut: true,
+            time: "",
+          });
+          renderInv();
+          saveState();
+        }
+      });
+
+      // ===== 보고서 생성 =====
+      function buildReport() {
+        const d = $("#date").value || "";
+        const total = state.salesTotal || 0;
+        const b = parseN($("#salesBakery").value),
+          s = parseN($("#salesSand").value);
+
+        const boxes = $("#boxes").value || "-";
+        const donSum = donationsSum();
+        const ycum = parseN($("#yesterdayCum").value);
+        const cumTotal = donSum + ycum;
+
+        const catDang = parseN($("#catDang").value);
+        const soDang = $("#catDangSoldOut").checked;
+        const catHealth = parseN($("#catHealth").value);
+        const soHealth = $("#catHealthSoldOut").checked;
+        const catSand = parseN($("#catSand").value);
+        const soSand = $("#catSandSoldOut").checked;
+
+        const sandLines = (state.sandItems || [])
+          .filter(
+            (x) =>
+              (x.name || "").trim() &&
+              (parseN(x.qty) > 0 || parseN(x.price) > 0)
+          )
+          .map((x) => {
+            const q = parseN(x.qty),
+              p = parseN(x.price),
+              total = q * p;
+            const parts = [`    - ${x.name}`];
+            if (q > 0) parts.push(` ${fmt(q)}`);
+            if (total > 0) parts.push(` (${fmt(total)})`);
+            return parts.join("");
+          })
+          .join("\n");
+
+        const invLines = (state.invItems || [])
+          .filter((x) => (x.name || "").trim())
+          .map((x) =>
+            x.soldOut
+              ? `- ${x.name}: 매진${
+                  normTime(x.time) ? ` (${normTime(x.time)})` : ""
+                }`
+              : (() => {
+                  const q = parseN(x.qty),
+                    p = parseN(x.price),
+                    total = q * p;
+                  return `- ${x.name}: ${fmt(q)} (${fmt(total)})`;
+                })()
+          )
+          .join("\n");
+
+        const lines = [
+          `${d} 마감입니다`,
+          "",
+          `총 매출: ${fmt(total)} (${hundredMillionTenMillionMillion(total)})`,
+          `- 빵집: ${fmt(b)}`,
+          `- 샌드위치: ${fmt(s)}`,
+          "",
+          `\n나눔빵: ${donSum ? fmt(donSum) : "-"} (${boxes || "-"})`,
+          `- 어제까지 나눔 누계: ${ycum ? fmt(ycum) : "-"}`,
+          `- 당월 나눔 누계: ${cumTotal ? fmt(cumTotal) : "-"}`,
+          "",
+          `\n- 단과자: ${soDang ? "매진" : catDang ? fmt(catDang) : "-"}`,
+          `- 건강빵: ${soHealth ? "매진" : catHealth ? fmt(catHealth) : "-"}`,
+          `- 샌드위치: ${soSand ? "매진" : catSand ? fmt(catSand) : "-"}`,
+          sandLines ? sandLines : "",
+          "",
+          "\n주요제품 재고",
+          invLines ? invLines : "",
+          "",
+          "\n일일 보고",
+          $("#dailyNote").value || "(보고내용)",
+        ]
+          .filter(Boolean)
+          .join("\n");
+
+        $("#output").value = lines;
+      }
+
+      // ===== 이벤트 =====
+      $("#gen").addEventListener("click", buildReport);
+      $("#copy").addEventListener("click", async () => {
+        const txt = $("#output").value;
+        if (!txt) return;
+        try {
+          await navigator.clipboard.writeText(txt);
+          $("#copy").textContent = "복사됨 ✔";
+          setTimeout(() => ($("#copy").textContent = "복사하기"), 1200);
+        } catch (e) {
+          // fallback
+          $("#output").select();
+          document.execCommand("copy");
+          $("#copy").textContent = "복사됨 ✔";
+          setTimeout(() => ($("#copy").textContent = "복사하기"), 1200);
+        }
+      });
+      $("#clearAll").addEventListener("click", () => {
+        if (!confirm("모든 입력을 초기화할까요? 저장된 값도 삭제됩니다."))
+          return;
+        localStorage.removeItem(KEY);
+        state = structuredClone(defaultState);
+        bindBasic();
+        renderSand();
+        renderInv();
+        $("#output").value = "";
+      });
+
+      // ===== 부팅 =====
+      bindBasic();
+      renderSand();
+      renderInv();
+      renderDonations();
+      buildReport();
+      onInputSync();
+      // ===== simple tests =====
+      console.assert(
+        hundredMillionTenMillionMillion(123456789) === "1억 2천 3백",
+        "HMTMM format failed"
+      );
+      console.assert(
+        normTime("1900") === "19:00" &&
+          normTime("930") === "09:30" &&
+          normTime("9") === "09:00",
+        "normTime failed"
+      );
+    </script>
+  </body>
+</html>
