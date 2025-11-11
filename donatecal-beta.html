@@ -211,6 +211,7 @@
     <header>
       <div class="inner">
         <h1>나눔 계산기</h1>
+        <div id="dailyQuote" class="help right"></div>
       </div>
     </header>
     <main class="grid">
@@ -218,7 +219,6 @@
       <section class="card">
         <div class="section-title">
           <h2>기본 정보</h2>
-          <small id="autosaveStatus" class="help">자동저장 대기</small>
         </div>
         <div class="row">
           <label for="date">날짜</label>
@@ -258,7 +258,7 @@
       </section>
 
       <section class="card">
-        <h2>나눔(기부)</h2>
+        <h2>나눔</h2>
         <table id="donTable">
           <thead>
             <tr>
@@ -293,7 +293,7 @@
 
       <section class="card">
         <div class="section-title">
-          <h2>카테고리 합계</h2>
+          <h2>분류별 재고</h2>
         </div>
         <div class="row">
           <label for="catDang">단과자</label
@@ -350,7 +350,7 @@
 
       <section class="card">
         <div class="section-title">
-          <h2>주요 제품 재고/매진</h2>
+          <h2>주요 제품 재고</h2>
           <small class="help">매진 체크 시 수량·단가는 무시</small>
         </div>
         <table id="invTable">
@@ -484,6 +484,94 @@
         if (el) el.value = state.catDang ? fmt(state.catDang) : "";
       }
 
+      // ===== Daily Quote (consistent per date) =====
+      const QUOTES = [
+        {
+          text: "성공은 작은 노력을 꾸준히 쌓은 결과다.",
+          author: "로버트 콜리어",
+        },
+        { text: "천 리 길도 한 걸음부터 시작된다.", author: "중국 속담" },
+        {
+          text: "우리가 반복해서 하는 것이 곧 우리다.",
+          author: "아리스토텔레스",
+        },
+        { text: "노력은 절대 배신하지 않는다.", author: "손흥민" },
+        {
+          text: "꾸준함은 천천히가 아니라 멈추지 않는 것이다.",
+          author: "콘라드 힐튼",
+        },
+        {
+          text: "잔잔한 물결도 오래 흐르면 바위를 뚫는다.",
+          author: "한국 속담",
+        },
+        { text: "성실함은 모든 덕의 기초다.", author: "벤저민 프랭클린" },
+        { text: "포기하지 않는 사람이 결국 해낸다.", author: "테드 터너" },
+        { text: "작은 습관이 큰 미래를 만든다.", author: "잭 캔필드" },
+        { text: "꾸준하면 못 오를 산이 없다.", author: "몽골 속담" },
+        { text: "강한 사람보다 꾸준한 사람이 이긴다.", author: "핀란드 속담" },
+        {
+          text: "오늘의 성실함이 내일의 기회를 만든다.",
+          author: "오프라 윈프리",
+        },
+        {
+          text: "천재란 오랫동안 인내한 사람일 뿐이다.",
+          author: "토머스 카라일",
+        },
+        { text: "습관은 두 번째 천성이다.", author: "로마 격언" },
+        { text: "계속 걷는다면 결국 목적지에 닿는다.", author: "영국 속담" },
+        {
+          text: "나는 재능보다 연습이 나를 만들었다고 믿는다.",
+          author: "안네트 켈러만",
+        },
+        {
+          text: "비가 와도 멈추지 않는 강은 끝내 바다에 다다른다.",
+          author: "스페인 속담",
+        },
+        { text: "성공은 준비된 사람을 좋아한다.", author: "루이스 파스퇴르" },
+        { text: "성실한 하루가 성실한 인생을 만든다.", author: "괴테" },
+        { text: "꾸준한 발걸음은 결국 산을 넘는다.", author: "일본 속담" },
+        {
+          text: "나는 매일 조금씩 나아지려고 노력했다.",
+          author: "마이클 조던",
+        },
+        { text: "뿌린 대로 거둔다.", author: "성경 격언" },
+        {
+          text: "한 번의 큰 도약보다 천 번의 작은 걸음이 더 멀리 간다.",
+          author: "노르웨이 속담",
+        },
+        {
+          text: "작은 발전도 멈추지 않으면 큰 성과가 된다.",
+          author: "조지 매튜스 애덤스",
+        },
+        { text: "반복은 능력을 만든다.", author: "라틴 격언" },
+        { text: "좋은 습관은 성공을 부른다.", author: "스티븐 코비" },
+        {
+          text: "천천히 가더라도 뒤로만 가지 않으면 된다.",
+          author: "러시아 속담",
+        },
+        { text: "성실함은 가장 강력한 무기다.", author: "사무엘 스마일스" },
+        {
+          text: "꾸준한 준비가 기적 같은 순간을 만든다.",
+          author: "무하마드 알리",
+        },
+        { text: "계속하면 이룬다.", author: "라틴 격언" },
+      ];
+      function quoteIndexFromDate(dateStr) {
+        // simple deterministic hash by date string (YYYY-MM-DD)
+        let h = 0;
+        for (let i = 0; i < dateStr.length; i++) {
+          h = (h * 31 + dateStr.charCodeAt(i)) >>> 0;
+        }
+        return h % QUOTES.length;
+      }
+      function setDailyQuote() {
+        const el = document.getElementById("dailyQuote");
+        if (!el) return;
+        const dStr = state.date || todayKST();
+        const pick = QUOTES[quoteIndexFromDate(dStr)];
+        el.textContent = `“${pick.text}” — ${pick.author}`;
+      }
+
       // ===== 초기 데이터 =====
       const defaultState = {
         date: "",
@@ -571,11 +659,6 @@
       }
       function saveState() {
         localStorage.setItem(KEY, JSON.stringify(state));
-        $("#autosaveStatus").textContent = "저장됨";
-        setTimeout(
-          () => ($("#autosaveStatus").textContent = "자동저장 대기"),
-          1200
-        );
       }
 
       let state = loadState();
@@ -589,6 +672,7 @@
       function bindBasic() {
         const dateEl = document.querySelector("#date");
         if (dateEl) dateEl.value = state.date || todayKST();
+        setDailyQuote();
         const dnEl = document.querySelector("#dailyNote");
         if (dnEl) dnEl.value = state.dailyNote;
 
@@ -632,6 +716,7 @@
         $("#date").addEventListener("input", (e) => {
           state.date = e.target.value;
           saveState();
+          setDailyQuote();
         });
         $("#dailyNote").addEventListener("input", (e) => {
           state.dailyNote = e.target.value;
@@ -1052,7 +1137,9 @@
         const lines = [
           `${dFmt} 마감입니다`,
           "",
-          `총 매출: ${fmt(total)} (${hundredMillionTenMillionMillion(total)})`,
+          `\n총 매출: ${fmt(total)} (${hundredMillionTenMillionMillion(
+            total
+          )})`,
           `- 빵집: ${fmt(b)}`,
           `- 샌드위치: ${fmt(s)}`,
           "",
@@ -1115,6 +1202,8 @@
       updateCatDang();
       buildReport();
       onInputSync();
+      setDailyQuote();
+
       // ===== simple tests =====
       console.assert(
         hundredMillionTenMillionMillion(123456789) === "1억 2천 3백",
