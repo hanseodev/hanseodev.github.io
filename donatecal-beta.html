@@ -237,7 +237,7 @@
           <label for="salesBakery">빵집 매출</label
           ><input
             id="salesBakery"
-            type="number"
+            type="text"
             inputmode="numeric"
             placeholder="0"
           />
@@ -246,7 +246,7 @@
           <label for="salesSand">샌드위치 매출</label
           ><input
             id="salesSand"
-            type="number"
+            type="text"
             inputmode="numeric"
             placeholder="0"
           />
@@ -254,7 +254,6 @@
         <div class="row">
           <label>총 매출</label
           ><input id="salesTotal" class="mono" type="text" readonly />
-          <div class="help" id="salesBreak"></div>
         </div>
       </section>
 
@@ -279,7 +278,12 @@
         </div>
         <div class="row">
           <label for="yesterdayCum">어제까지 나눔 누계</label
-          ><input id="yesterdayCum" type="number" placeholder="" />
+          ><input
+            id="yesterdayCum"
+            type="text"
+            inputmode="numeric"
+            placeholder=""
+          />
         </div>
         <div class="row">
           <label for="donationCum">당월 나눔 누계</label
@@ -293,23 +297,34 @@
         </div>
         <div class="row">
           <label for="catDang">단과자</label
-          ><input id="catDang" type="number" placeholder="" /><label
-            class="help"
-            ><input id="catDangSoldOut" type="checkbox" checked /> 매진</label
-          >
+          ><input
+            id="catDang"
+            type="text"
+            inputmode="numeric"
+            placeholder="자동계산됩니다"
+            readonly
+          />
         </div>
         <div class="row">
           <label for="catHealth">건강빵</label
-          ><input id="catHealth" type="number" placeholder="" /><label
-            class="help"
-            ><input id="catHealthSoldOut" type="checkbox" checked /> 매진</label
+          ><input
+            id="catHealth"
+            type="text"
+            inputmode="numeric"
+            placeholder=""
+          /><label class="help"
+            ><input id="catHealthSoldOut" type="checkbox" /> 매진</label
           >
         </div>
         <div class="row">
           <label for="catSand">샌드위치</label
-          ><input id="catSand" type="number" placeholder="" /><label
-            class="help"
-            ><input id="catSandSoldOut" type="checkbox" checked /> 매진</label
+          ><input
+            id="catSand"
+            type="text"
+            inputmode="numeric"
+            placeholder=""
+          /><label class="help"
+            ><input id="catSandSoldOut" type="checkbox" /> 매진</label
           >
         </div>
         <div class="stack">
@@ -377,13 +392,6 @@
       </section>
     </main>
 
-    <footer class="footer">
-      <div class="inner help">
-        입력값은 브라우저 <b>localStorage</b>에 자동 저장됩니다. 같은
-        PC·브라우저에서 다시 열면 이어서 작성할 수 있어요.
-      </div>
-    </footer>
-
     <script>
       // ===== 유틸 =====
       const $ = (sel) => document.querySelector(sel);
@@ -412,6 +420,25 @@
         return `${eok}억 ${tenM}천 ${oneM}백`;
       }
       // 시간 정규화: 1900 -> 19:00, 930 -> 09:30
+      // 입력 필드에 3자리 콤마 자동 적용 (숫자만 허용)
+      function formatCommaField(el) {
+        if (!el) return 0;
+        // 숫자만 남기기
+        const raw = (el.value || "").replace(/[^0-9]/g, "");
+        if (raw === "") {
+          el.value = "";
+          return 0;
+        }
+        // 3자리 콤마 적용
+        const withCommas = raw.replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        // 커서 이동 이슈 최소화: 끝으로 보냄
+        const selEnd = withCommas.length;
+        el.value = withCommas;
+        try {
+          el.setSelectionRange(selEnd, selEnd);
+        } catch (_) {}
+        return parseN(withCommas);
+      }
       function normTime(val) {
         if (!val) return "";
         let s = String(val).trim();
@@ -426,6 +453,37 @@
         return s;
       }
 
+      // 고정 품목 집합 및 단과자 자동계산
+      const FIXED_NAMES = new Set([
+        "튀소",
+        "구마",
+        "부추",
+        "초코",
+        "크리미",
+        "말차튀소",
+      ]);
+
+      function fixedItemsTotal() {
+        return (state.invItems || []).reduce((sum, it) => {
+          if (FIXED_NAMES.has(it.name) && !it.soldOut) {
+            const q = parseN(it.qty);
+            const p = parseN(it.price);
+            return sum + q * p;
+          }
+          return sum;
+        }, 0);
+      }
+
+      function updateCatDang() {
+        const donations = donationsSum(); // 모든 나눔처 금액 합
+        const fixedSum = fixedItemsTotal(); // 튀소~말차튀소 합(매진 제외)
+        const health = parseN(document.querySelector("#catHealth").value);
+        const val = donations - fixedSum - health;
+        state.catDang = val > 0 ? val : 0;
+        const el = document.querySelector("#catDang");
+        if (el) el.value = state.catDang ? fmt(state.catDang) : "";
+      }
+
       // ===== 초기 데이터 =====
       const defaultState = {
         date: "",
@@ -433,25 +491,70 @@
         salesBakery: 0,
         salesSand: 0,
         boxes: 0,
-        donations: [],
+        donations: [
+          { name: "나눔처 A", amount: 0, fixed: true },
+          { name: "나눔처 B", amount: 0, fixed: true },
+          { name: "나눔처 C", amount: 0, fixed: true },
+        ],
         yesterdayCum: 0,
         donationCum: 0,
         catDang: 0,
-        catDangSoldOut: true,
         catHealth: 0,
-        catHealthSoldOut: true,
+        catHealthSoldOut: false,
         catSand: 0,
-        catSandSoldOut: true,
-        sandItems: [],
+        catSandSoldOut: false,
+        sandItems: [{ name: "", qty: 0, price: 0 }],
         invItems: [
-          { name: "튀소", qty: 0, price: 0, soldOut: true, time: "" },
-          { name: "구마", qty: 0, price: 0, soldOut: true, time: "" },
-          { name: "부추", qty: 0, price: 0, soldOut: true, time: "" },
-          { name: "초코", qty: 0, price: 0, soldOut: true, time: "" },
-          { name: "크리미", qty: 0, price: 0, soldOut: true, time: "" },
-          { name: "", qty: 0, price: 0, soldOut: true, time: "" },
+          {
+            name: "튀소",
+            qty: 0,
+            price: 0,
+            soldOut: false,
+            time: "",
+            fixed: true,
+          },
+          {
+            name: "구마",
+            qty: 0,
+            price: 0,
+            soldOut: false,
+            time: "",
+            fixed: true,
+          },
+          {
+            name: "부추",
+            qty: 0,
+            price: 0,
+            soldOut: false,
+            time: "",
+            fixed: true,
+          },
+          {
+            name: "초코",
+            qty: 0,
+            price: 0,
+            soldOut: false,
+            time: "",
+            fixed: true,
+          },
+          {
+            name: "크리미",
+            qty: 0,
+            price: 0,
+            soldOut: false,
+            time: "",
+            fixed: true,
+          },
+          {
+            name: "말차튀소",
+            qty: 0,
+            price: 0,
+            soldOut: false,
+            time: "",
+            fixed: true,
+          },
+          { name: "", qty: 0, price: 0, soldOut: false, time: "" },
         ],
-        soldItems: [{ name: "명란바게트", time: "18:30" }],
       };
 
       const KEY = "closing_report_v1";
@@ -478,25 +581,51 @@
       let state = loadState();
 
       // ===== 폼 바인딩 =====
+      function todayKST() {
+        const t = new Date();
+        t.setHours(t.getHours() + 9);
+        return t.toISOString().slice(0, 10);
+      }
       function bindBasic() {
-        $("#date").value = state.date || new Date().toISOString().slice(0, 10);
-        $("#dailyNote").value = state.dailyNote;
+        const dateEl = document.querySelector("#date");
+        if (dateEl) dateEl.value = state.date || todayKST();
+        const dnEl = document.querySelector("#dailyNote");
+        if (dnEl) dnEl.value = state.dailyNote;
 
-        $("#salesBakery").value = state.salesBakery || "";
-        $("#salesSand").value = state.salesSand || "";
+        const sbEl = document.querySelector("#salesBakery");
+        if (sbEl) sbEl.value = state.salesBakery ? fmt(state.salesBakery) : "";
+        const ssEl = document.querySelector("#salesSand");
+        if (ssEl) ssEl.value = state.salesSand ? fmt(state.salesSand) : "";
 
-        $("#boxes").value = state.boxes || "";
-        $("#yesterdayCum").value = state.yesterdayCum || "";
-        $("#donationCum").value = state.donationCum || "";
+        const bxEl = document.querySelector("#boxes");
+        if (bxEl) bxEl.value = state.boxes || "";
+        const ycEl0 = document.querySelector("#yesterdayCum");
+        if (ycEl0)
+          ycEl0.value = state.yesterdayCum ? fmt(state.yesterdayCum) : "";
+        const dcEl = document.querySelector("#donationCum");
+        if (dcEl) dcEl.value = state.donationCum || "";
 
-        $("#catDang").value = state.catDang || "";
-        $("#catHealth").value = state.catHealth || "";
-        $("#catSand").value = state.catSand || "";
-        $("#catDangSoldOut").checked = !!state.catDangSoldOut;
-        $("#catHealthSoldOut").checked = !!state.catHealthSoldOut;
-        $("#catSandSoldOut").checked = !!state.catSandSoldOut;
+        const cdEl = document.querySelector("#catDang");
+        if (cdEl) cdEl.value = state.catDang ? fmt(state.catDang) : "";
+        const chEl0 = document.querySelector("#catHealth");
+        if (chEl0) chEl0.value = state.catHealth ? fmt(state.catHealth) : "";
+        const csEl0 = document.querySelector("#catSand");
+        if (csEl0) csEl0.value = state.catSand ? fmt(state.catSand) : "";
+
+        const chsEl = document.querySelector("#catHealthSoldOut");
+        if (chsEl) chsEl.checked = !!state.catHealthSoldOut;
+        const cssEl = document.querySelector("#catSandSoldOut");
+        if (cssEl) cssEl.checked = !!state.catSandSoldOut;
+
         renderDonations();
         calcTotals();
+        updateCatDang();
+        syncCategoryDisabled();
+        calcTotals();
+        ["yesterdayCum", "catHealth", "catSand"].forEach((id) => {
+          const el = document.querySelector("#" + id);
+          if (el && el.value) el.value = fmt(parseN(el.value));
+        });
       }
 
       function onInputSync() {
@@ -510,48 +639,129 @@
         });
 
         ["salesBakery", "salesSand"].forEach((id) => {
+          const el = document.querySelector("#" + id);
+          if (!el) return;
+
+          const reformat = () => {
+            const val = formatCommaField(el); // 숫자만 남기고 3자리 콤마
+            state[id] = val;
+            calcTotals(); // 총합 즉시 갱신
+            saveState();
+          };
+
+          el.addEventListener("input", reformat);
+          el.addEventListener("keyup", (e) => {
+            if (e.key !== "Tab") reformat();
+          });
+          el.addEventListener("paste", () => {
+            setTimeout(reformat, 0);
+          });
+          el.addEventListener("blur", () => {
+            el.value = state[id] ? fmt(state[id]) : "";
+          });
+
+          // 페이지 로드 후 값이 있으면 한 번 정규화
+          if (el.value) {
+            reformat();
+          }
+        });
+
+        // 기존: boxes, yesterdayCum, donationCum, catDang, catHealth, catSand
+        // => boxes, donationCum: 그대로, catDang/Health/Sand/yesterdayCum: custom listeners below
+        ["boxes", "donationCum"].forEach((id) => {
           $("#" + id).addEventListener("input", (e) => {
             state[id] = parseN(e.target.value);
-            calcTotals();
             saveState();
           });
         });
 
-        [
-          "boxes",
-          "yesterdayCum",
-          "donationCum",
-          "catDang",
-          "catHealth",
-          "catSand",
-        ].forEach((id) => {
-          $("#" + id).addEventListener("input", (e) => {
-            state[id] = parseN(e.target.value);
+        ["catHealth", "catSand"].forEach((id) => {
+          // ← catDang 제외
+          const el = document.querySelector("#" + id);
+          if (!el) return;
+          el.addEventListener("input", () => {
+            state[id] = formatCommaField(el);
             saveState();
+            if (id === "catHealth") updateCatDang(); // ← 건강빵 바뀌면 단과자 재계산
+          });
+          el.addEventListener("blur", () => {
+            el.value = state[id] ? fmt(state[id]) : "";
           });
         });
-        $("#catHealthSoldOut").addEventListener("change", (e) => {
-          state.catHealthSoldOut = e.target.checked;
-          saveState();
-        });
-        $("#catDangSoldOut").addEventListener("change", (e) => {
-          state.catDangSoldOut = e.target.checked;
-          saveState();
-        });
-        $("#catSandSoldOut").addEventListener("change", (e) => {
-          state.catSandSoldOut = e.target.checked;
-          saveState();
-        });
+        const ycEl = document.querySelector("#yesterdayCum");
+        if (ycEl) {
+          ycEl.addEventListener("input", () => {
+            state.yesterdayCum = formatCommaField(ycEl);
+            updateDonationCum();
+            saveState();
+          });
+          ycEl.addEventListener("blur", () => {
+            ycEl.value = state.yesterdayCum ? fmt(state.yesterdayCum) : "";
+          });
+        }
+
+        const hso = document.querySelector("#catHealthSoldOut");
+        if (hso) {
+          hso.addEventListener("change", (e) => {
+            state.catHealthSoldOut = e.target.checked;
+            saveState();
+            syncCategoryDisabled();
+          });
+        }
+        const sso = document.querySelector("#catSandSoldOut");
+        if (sso) {
+          sso.addEventListener("change", (e) => {
+            state.catSandSoldOut = e.target.checked;
+            saveState();
+            syncCategoryDisabled();
+          });
+        }
       }
 
       function calcTotals() {
-        const total =
-          parseN($("#salesBakery").value) + parseN($("#salesSand").value);
+        const bEl = document.querySelector("#salesBakery");
+        const sEl = document.querySelector("#salesSand");
+        const tEl = document.querySelector("#salesTotal");
+        const br = document.querySelector("#salesBreak");
+
+        const b = parseN(bEl && bEl.value);
+        const s = parseN(sEl && sEl.value);
+        const total = b + s;
         state.salesTotal = total;
-        $("#salesTotal").value = fmt(total);
-        $("#salesBreak").textContent = `(${hundredMillionTenMillionMillion(
-          total
-        )})`;
+
+        if (tEl) tEl.value = fmt(total);
+        if (br) br.textContent = `(${hundredMillionTenMillionMillion(total)})`;
+      }
+      // 카테고리 입력 비/활성 연동
+      function syncCategoryDisabled() {
+        const healthEl = document.querySelector("#catHealth");
+        const healthSo = document.querySelector("#catHealthSoldOut");
+        if (healthEl && healthSo) {
+          if (healthSo.checked) {
+            if (!healthEl.dataset.prev) healthEl.dataset.prev = healthEl.value;
+            healthEl.value = "";
+            healthEl.disabled = true;
+          } else {
+            healthEl.disabled = false;
+            if (healthEl.dataset.prev && !healthEl.value) {
+              healthEl.value = healthEl.dataset.prev;
+            }
+          }
+        }
+        const sandEl = document.querySelector("#catSand");
+        const sandSo = document.querySelector("#catSandSoldOut");
+        if (sandEl && sandSo) {
+          if (sandSo.checked) {
+            if (!sandEl.dataset.prev) sandEl.dataset.prev = sandEl.value;
+            sandEl.value = "";
+            sandEl.disabled = true;
+          } else {
+            sandEl.disabled = false;
+            if (sandEl.dataset.prev && !sandEl.value) {
+              sandEl.value = sandEl.dataset.prev;
+            }
+          }
+        }
       }
 
       // ===== 동적 테이블: 샌드위치 세부 =====
@@ -568,16 +778,16 @@
         state.sandItems.forEach((it, idx) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-      <td><input data-idx="${idx}" data-k="name" value="${
+            <td><input data-idx="${idx}" data-k="name" value="${
             it.name
           }" placeholder="제품명"/></td>
-      <td><input type="number" min="0" step="1" data-idx="${idx}" data-k="qty" value="${
+            <td><input type="number" min="0" step="1" data-idx="${idx}" data-k="qty" value="${
             it.qty || ""
           }"/></td>
-      <td><input type="number" min="0" step="100" data-idx="${idx}" data-k="price" value="${
+            <td><input type="number" min="0" step="100" data-idx="${idx}" data-k="price" value="${
             it.price || ""
           }"/></td>
-      <td><button data-idx="${idx}" class="delSand">삭제</button></td>`;
+            <td><button data-idx="${idx}" class="delSand">삭제</button></td>`;
           sandBody.appendChild(tr);
         });
       }
@@ -620,6 +830,33 @@
           else state.donations[idx].fixed = true;
         });
       }
+
+      // ==== Migration to fix disabled/empty lists from old localStorage ====
+      function migrateState() {
+        // Donations: ensure A–C exist and remain editable for amounts
+        if (!Array.isArray(state.donations)) state.donations = [];
+        ensureFixedABC();
+
+        // Inventory: ensure six fixed items exist and are NOT soldOut by default
+        const FIX = ["튀소", "구마", "부추", "초코", "크리미", "말차튀소"];
+        if (!Array.isArray(state.invItems)) state.invItems = [];
+        FIX.forEach((nm) => {
+          let item = state.invItems.find((it) => it.name === nm);
+          if (!item) {
+            state.invItems.push({
+              name: nm,
+              qty: 0,
+              price: 0,
+              soldOut: false,
+              time: "",
+              fixed: true,
+            });
+          } else {
+            item.fixed = true;
+            if (item.soldOut === true) item.soldOut = false; // re-enable qty/price inputs
+          }
+        });
+      }
       function nextDonor() {
         const base = state.donations?.length
           ? Math.max(3, state.donations.length)
@@ -634,17 +871,17 @@
           const isFixed = !!it.fixed;
           const tr = document.createElement("tr");
           tr.innerHTML = `
-            <td><input data-idx="${idx}" data-k="name" value="${it.name}" ${
-            isFixed ? "disabled" : ""
-          }/></td>
-            <td><input type="number" min="0" step="100" data-idx="${idx}" data-k="amount" value="${
-            it.amount > 0 ? it.amount : ""
+                  <td><input data-idx="${idx}" data-k="name" value="${
+            it.name
+          }" ${isFixed ? "disabled" : ""}/></td>
+                  <td><input type="text" inputmode="numeric" data-idx="${idx}" data-k="amount" value="${
+            it.amount > 0 ? fmt(it.amount) : ""
           }"/></td>
-            <td>${
-              isFixed
-                ? ""
-                : `<button data-idx="${idx}" class="delDon">삭제</button>`
-            }</td>`;
+                  <td>${
+                    isFixed
+                      ? ""
+                      : `<button data-idx="${idx}" class="delDon">삭제</button>`
+                  }</td>`;
           donBody.appendChild(tr);
         });
         updateDonationCum();
@@ -653,10 +890,18 @@
         const idx = e.target.getAttribute("data-idx");
         const k = e.target.getAttribute("data-k");
         if (idx == null || !k) return;
-        const v = k === "name" ? e.target.value : parseN(e.target.value);
+        let v;
+        if (k === "name") {
+          v = e.target.value;
+        } else if (k === "amount") {
+          v = formatCommaField(e.target);
+        } else {
+          v = parseN(e.target.value);
+        }
         state.donations[idx][k] = v;
         saveState();
         updateDonationCum();
+        updateCatDang();
       });
       donBody.addEventListener("click", (e) => {
         if (e.target.classList.contains("delDon")) {
@@ -684,11 +929,7 @@
         const y = parseN($("#yesterdayCum").value);
         $("#donationCum").value = fmt(sum + y);
       }
-      $("#yesterdayCum").addEventListener("input", () => {
-        state.yesterdayCum = parseN($("#yesterdayCum").value);
-        updateDonationCum();
-        saveState();
-      });
+      // (listener moved to onInputSync)
 
       // ===== 동적 테이블: 재고 =====
       const invBody = document.querySelector("#invTable tbody");
@@ -697,20 +938,23 @@
         state.invItems.forEach((it, idx) => {
           const tr = document.createElement("tr");
           tr.innerHTML = `
-  <td><input data-idx="${idx}" data-k="name" value="${it.name}"/></td>
-  <td><input type="number" min="0" step="1" data-idx="${idx}" data-k="qty" value="${
+        <td>  <input data-idx="${idx}" data-k="name" value="${it.name}" ${
+            it.fixed ? "disabled" : ""
+          }/>
+      </td>
+        <td><input type="number" min="0" step="1" data-idx="${idx}" data-k="qty" value="${
             it.qty || ""
           }" ${it.soldOut ? "disabled" : ""}/></td>
-  <td><input type="number" min="0" step="100" data-idx="${idx}" data-k="price" value="${
+        <td><input type="number" min="0" step="100" data-idx="${idx}" data-k="price" value="${
             it.price || ""
           }" ${it.soldOut ? "disabled" : ""}/></td>
-  <td style="text-align:center"><input type="checkbox" data-idx="${idx}" data-k="soldOut" ${
+        <td style="text-align:center"><input type="checkbox" data-idx="${idx}" data-k="soldOut" ${
             it.soldOut ? "checked" : ""
           }/></td>
-  <td><input data-idx="${idx}" data-k="time" placeholder="HHMM" value="${
+        <td><input data-idx="${idx}" data-k="time" placeholder="HHMM" value="${
             it.time || ""
           }"/></td>
-`;
+      `;
           invBody.appendChild(tr);
         });
       }
@@ -718,21 +962,20 @@
         const idx = e.target.getAttribute("data-idx");
         const k = e.target.getAttribute("data-k");
         if (idx == null || !k) return;
+
+        const item = state.invItems[Number(idx)];
+        if (k === "name" && item && item.fixed) return; // 고정품목 이름 변경 차단
+
         let v;
-        if (k === "soldOut") {
-          v = e.target.checked;
-        } else if (k === "name") {
-          v = e.target.value;
-        } else if (k === "time") {
-          v = normTime(e.target.value);
-        } else {
-          v = parseN(e.target.value);
-        }
+        if (k === "soldOut") v = e.target.checked;
+        else if (k === "name") v = e.target.value;
+        else if (k === "time") v = normTime(e.target.value);
+        else v = parseN(e.target.value);
+
         state.invItems[idx][k] = v;
-        if (k === "soldOut") {
-          renderInv();
-        }
+        if (k === "soldOut") renderInv();
         saveState();
+        updateCatDang();
       });
       document.addEventListener("click", (e) => {
         if (e.target.id === "addInv") {
@@ -740,7 +983,7 @@
             name: "",
             qty: 0,
             price: 0,
-            soldOut: true,
+            soldOut: false,
             time: "",
           });
           renderInv();
@@ -754,14 +997,20 @@
         const total = state.salesTotal || 0;
         const b = parseN($("#salesBakery").value),
           s = parseN($("#salesSand").value);
-
-        const boxes = $("#boxes").value || "-";
+        const dFmt = (() => {
+          if (!d) return "";
+          const [yy, mm, dd] = d.split("-");
+          return `${yy}년 ${mm}월 ${dd}일`;
+        })();
+        const boxesRaw = parseFloat($("#boxes").value);
+        const halfBoxes = Number.isFinite(boxesRaw)
+          ? Math.round((boxesRaw / 2) * 100) / 100
+          : "-";
         const donSum = donationsSum();
         const ycum = parseN($("#yesterdayCum").value);
         const cumTotal = donSum + ycum;
 
         const catDang = parseN($("#catDang").value);
-        const soDang = $("#catDangSoldOut").checked;
         const catHealth = parseN($("#catHealth").value);
         const soHealth = $("#catHealthSoldOut").checked;
         const catSand = parseN($("#catSand").value);
@@ -779,7 +1028,7 @@
               total = q * p;
             const parts = [`    - ${x.name}`];
             if (q > 0) parts.push(` ${fmt(q)}`);
-            if (total > 0) parts.push(` (${fmt(total)})`);
+            if (total > 0) parts.push(` (${fmt(total)}₩)`);
             return parts.join("");
           })
           .join("\n");
@@ -795,23 +1044,24 @@
                   const q = parseN(x.qty),
                     p = parseN(x.price),
                     total = q * p;
-                  return `- ${x.name}: ${fmt(q)} (${fmt(total)})`;
+                  return `- ${x.name}: ${fmt(q)} (${fmt(total)}₩)`;
                 })()
           )
           .join("\n");
 
         const lines = [
-          `${d} 마감입니다`,
+          `${dFmt} 마감입니다`,
           "",
           `총 매출: ${fmt(total)} (${hundredMillionTenMillionMillion(total)})`,
           `- 빵집: ${fmt(b)}`,
           `- 샌드위치: ${fmt(s)}`,
           "",
-          `\n나눔빵: ${donSum ? fmt(donSum) : "-"} (${boxes || "-"})`,
-          `- 어제까지 나눔 누계: ${ycum ? fmt(ycum) : "-"}`,
-          `- 당월 나눔 누계: ${cumTotal ? fmt(cumTotal) : "-"}`,
+          `\n나눔빵: ${donSum ? fmt(donSum) : "-"} (${
+            halfBoxes === "-" ? "-" : halfBoxes
+          } BOX)`,
+          `- 이번달 나눔 누계: ${cumTotal ? fmt(cumTotal) : "-"}`,
           "",
-          `\n- 단과자: ${soDang ? "매진" : catDang ? fmt(catDang) : "-"}`,
+          `\n- 단과자: ${catDang ? fmt(catDang) : "-"}`,
           `- 건강빵: ${soHealth ? "매진" : catHealth ? fmt(catHealth) : "-"}`,
           `- 샌드위치: ${soSand ? "매진" : catSand ? fmt(catSand) : "-"}`,
           sandLines ? sandLines : "",
@@ -857,10 +1107,12 @@
       });
 
       // ===== 부팅 =====
+      migrateState();
       bindBasic();
       renderSand();
       renderInv();
       renderDonations();
+      updateCatDang();
       buildReport();
       onInputSync();
       // ===== simple tests =====
