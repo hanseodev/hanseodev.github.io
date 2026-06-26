@@ -44,11 +44,11 @@
     }
     .form-panel h1 { font-size: 17px; font-weight: 700; color: #1b3d2a; margin-bottom: 24px; }
     .section-title {
-      font-size: 11px; font-weight: 700; color: #aaa;
+      font-size: 11px; font-weight: 700; color: #444;
       letter-spacing: .08em; text-transform: uppercase; margin: 20px 0 10px;
     }
     .field { margin-bottom: 10px; }
-    .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+    .field label { display: block; font-size: 12px; color: #333; margin-bottom: 4px; }
     input[type="text"],
     input[type="number"],
     input[type="date"] {
@@ -72,7 +72,7 @@
     .oos-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
     .oos-entry { display: flex; align-items: center; gap: 6px; }
     .oos-entry input { flex: none; }
-    .oos-sep { font-size: 12px; color: #999; flex-shrink: 0; }
+    .oos-sep { font-size: 12px; color: #333; flex-shrink: 0; }
     .btn { border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px; padding: 5px 10px; transition: background .15s; }
     .btn-del { background: #fee8e8; color: #c00; }
     .btn-del:hover { background: #fdd; }
@@ -108,7 +108,7 @@
     .rc-stat-col { flex: 1; padding: 12px 14px; border-right: 1px solid #f0f0f0; }
     .rc-stat-col:last-child { border-right: none; }
     .rc-stat-name {
-      font-size: 13px; font-weight: 700; color: #999; margin-bottom: 6px;
+      font-size: 13px; font-weight: 700; color: #333; margin-bottom: 6px;
       display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden;
     }
     .rc-stat-name .dot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
@@ -118,19 +118,20 @@
       font-size: 17px; font-weight: 700; padding: 6px 16px;
       border-radius: 20px; margin-top: 10px;
     }
-    .rc-stat-oos { font-size: 14px; font-weight: 700; color: #aaa; margin-top: 8px; }
+    .rc-stat-oos-label { font-size: 13px; font-weight: 700; color: #222; margin-top: 10px; }
+    .rc-stat-oos { font-size: 14px; font-weight: 700; color: #222; margin-top: 3px; }
 
     .rc-tl-wrap { padding: 16px 22px 22px; }
     .rc-tl-title {
-      font-size: 10px; font-weight: 700; color: #bbb;
+      font-size: 17px; font-weight: 700; color: #444;
       letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px;
     }
     .tl-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     .tl-th-time { width: 38px; }
-    .tl-table thead th { font-size: 10px; color: #666; font-weight: 600; padding-bottom: 6px; text-align: center; }
+    .tl-table thead th { font-size: 14px; color: #333; font-weight: 600; padding-bottom: 6px; text-align: center; }
     .tl-row td { height: 6px; }
     .tl-td-time {
-      font-size: 8px; color: #ccc; text-align: right;
+      font-size: 8px; color: #888; text-align: right;
       padding-right: 7px; white-space: nowrap; vertical-align: top;
       line-height: 12px; border: none !important;
     }
@@ -144,7 +145,7 @@
     }
     .copy-btn:hover { background: #2a5a3e; }
     .copy-btn:active { background: #132e1e; }
-    .copy-status { font-size: 13px; color: #555; min-height: 18px; text-align: center; }
+    .copy-status { font-size: 13px; color: #333; min-height: 18px; text-align: center; }
 
     /* ─── 모바일 ─── */
     @media (max-width: 768px) {
@@ -250,7 +251,7 @@
       <div id="preview-timeline"></div>
     </div>
   </div>
-  <button class="copy-btn" onclick="copyToClipboard()">클립보드에 복사</button>
+  <button class="copy-btn" onclick="copyToClipboard()">공유하기</button>
   <div class="copy-status" id="copy-status"></div>
 </div>
 
@@ -368,10 +369,11 @@
       const color = COLORS[pi % COLORS.length];
       const qty = p.quantity !== '' ? Number(p.quantity).toLocaleString('ko-KR') : '—';
       const badge = p.soldoutTime ? `<div class="rc-stat-badge">${fmt(p.soldoutTime)} 매진</div>` : '';
-      const oosList = p.oos
-        .filter(o => parseMin(o.start) !== null && parseMin(o.end) !== null)
-        .map(o => `<div class="rc-stat-oos">${fmt(o.start)}-${fmt(o.end)} 일시품절</div>`)
-        .join('');
+      const oosFiltered = p.oos.filter(o => parseMin(o.start) !== null && parseMin(o.end) !== null);
+      const oosList = oosFiltered.length
+        ? `<div class="rc-stat-oos-label">일시품절</div>` +
+          oosFiltered.map(o => `<div class="rc-stat-oos">${fmt(o.start)}-${fmt(o.end)}</div>`).join('')
+        : '';
       return `<div class="rc-stat-col">
         <div class="rc-stat-name">
           <span class="dot" style="background:${color}"></span>${escHtml(p.name || '?')}
@@ -442,7 +444,7 @@
         const file = new File([blob], `판매보고서_${dateStr}.png`, { type: 'image/png' });
         if (navigator.canShare && navigator.canShare({ files: [file] })) {
           try {
-            await navigator.share({ files: [file], title: `판매보고서 ${dateStr}` });
+            await navigator.share({ files: [file] });
             status.textContent = '';
             return;
           } catch (e) {
