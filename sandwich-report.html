@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>샌드위치정거장 판매 보고서</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+      background: #f0f2f0;
+      min-height: 100vh;
+      display: flex;
+    }
+
+    /* ─── Form Panel ─── */
+    .form-panel {
+      width: 400px;
+      min-width: 400px;
+      background: #fff;
+      border-right: 1px solid #e0e0e0;
+      height: 100vh;
+      overflow-y: auto;
+      padding: 28px 24px;
+    }
+    .form-panel h1 { font-size: 17px; font-weight: 700; color: #1b3d2a; margin-bottom: 24px; }
+    .section-title {
+      font-size: 11px; font-weight: 700; color: #aaa;
+      letter-spacing: .08em; text-transform: uppercase; margin: 20px 0 10px;
+    }
+    .field { margin-bottom: 10px; }
+    .field label { display: block; font-size: 12px; color: #666; margin-bottom: 4px; }
+    input[type="text"],
+    input[type="number"],
+    input[type="date"] {
+      width: 100%; padding: 8px 10px; border: 1px solid #ddd; border-radius: 7px;
+      font-size: 14px; font-family: inherit; color: #222; background: #fafafa; transition: border-color .15s;
+    }
+    input:focus { outline: none; border-color: #1b3d2a; background: #fff; }
+    .t-input {
+      width: 72px !important; padding: 8px 10px; border: 1px solid #ddd; border-radius: 7px;
+      font-size: 15px; font-family: 'SF Mono', 'Menlo', monospace; color: #222;
+      background: #fafafa; letter-spacing: 2px; text-align: center; transition: border-color .15s;
+    }
+    .product-card {
+      background: #f7f9f7; border: 1px solid #e0e8e0; border-radius: 10px; padding: 14px; margin-bottom: 10px;
+    }
+    .product-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 10px; }
+    .product-card-header .label { font-size: 12px; font-weight: 700; color: #1b3d2a; display: flex; align-items: center; gap: 7px; }
+    .color-dot { width: 10px; height: 10px; border-radius: 3px; display: inline-block; flex-shrink: 0; }
+    .row { display: flex; gap: 8px; }
+    .row .field { flex: 1; }
+    .oos-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+    .oos-entry { display: flex; align-items: center; gap: 6px; }
+    .oos-entry input { flex: none; }
+    .oos-sep { font-size: 12px; color: #999; flex-shrink: 0; }
+    .btn { border: none; border-radius: 6px; cursor: pointer; font-family: inherit; font-size: 12px; padding: 5px 10px; transition: background .15s; }
+    .btn-del { background: #fee8e8; color: #c00; }
+    .btn-del:hover { background: #fdd; }
+    .btn-add-oos { background: #e8f2e8; color: #1b3d2a; margin-top: 6px; }
+    .btn-add-oos:hover { background: #d4ebd4; }
+    .btn-add-product {
+      width: 100%; padding: 10px; background: #eef2ee; color: #1b3d2a;
+      border: 1.5px dashed #bdd0bd; border-radius: 9px; margin-top: 4px;
+      font-size: 13px; cursor: pointer; font-family: inherit;
+    }
+    .btn-add-product:hover { background: #e0ebe0; }
+
+    /* ─── Preview Panel ─── */
+    .preview-panel {
+      flex: 1; display: flex; flex-direction: column; align-items: center;
+      justify-content: flex-start; padding: 40px 32px; gap: 24px; overflow-y: auto;
+    }
+
+    /* ─── Report Card ─── */
+    #report-card {
+      width: 580px;
+      background: #fff;
+      border-radius: 18px;
+      overflow: hidden;
+      box-shadow: 0 6px 32px rgba(0,0,0,0.13);
+    }
+
+    .rc-header {
+      background: #1b3d2a; padding: 22px 28px 18px; color: #fff;
+    }
+    .rc-date { font-size: 13px; opacity: .65; margin-bottom: 3px; }
+    .rc-title { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
+    .rc-sub { font-size: 12px; opacity: .5; margin-top: 3px; }
+
+    /* Stats strip */
+    .rc-stats {
+      display: flex;
+      border-bottom: 1px solid #f0f0f0;
+    }
+    .rc-stat-col {
+      flex: 1;
+      padding: 12px 14px;
+      border-right: 1px solid #f0f0f0;
+    }
+    .rc-stat-col:last-child { border-right: none; }
+    .rc-stat-name {
+      font-size: 13px; font-weight: 700; color: #999; margin-bottom: 6px;
+      display: flex; align-items: center; gap: 6px; white-space: nowrap; overflow: hidden;
+    }
+    .rc-stat-name .dot { width: 7px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+    .rc-stat-qty { font-size: 26px; font-weight: 800; color: #1b3d2a; letter-spacing: -.5px; }
+    .rc-stat-badge {
+      display: inline-block; background: #1b3d2a; color: #fff;
+      font-size: 17px; font-weight: 700; padding: 6px 16px;
+      border-radius: 20px; margin-top: 10px;
+    }
+    .rc-stat-oos {
+      font-size: 14px; font-weight: 700; color: #aaa; margin-top: 8px;
+    }
+
+    /* Timeline */
+    .rc-tl-wrap { padding: 16px 22px 22px; }
+    .rc-tl-title {
+      font-size: 10px; font-weight: 700; color: #bbb;
+      letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px;
+    }
+
+    .tl-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    .tl-th-time { width: 38px; }
+    .tl-table thead th {
+      font-size: 10px; color: #666; font-weight: 600;
+      padding-bottom: 6px; text-align: center;
+    }
+    .tl-row td { height: 6px; }
+    .tl-td-time {
+      font-size: 8px; color: #ccc; text-align: right;
+      padding-right: 7px; white-space: nowrap; vertical-align: top;
+      line-height: 12px; border: none !important;
+    }
+    .tl-td-cell { border: 0.5px solid rgba(0,0,0,0.05); }
+
+    /* Copy button */
+    .copy-btn {
+      background: #1b3d2a; color: #fff; border: none; border-radius: 12px;
+      padding: 15px 40px; font-size: 15px; font-weight: 700;
+      cursor: pointer; font-family: inherit; transition: background .15s;
+    }
+    .copy-btn:hover { background: #2a5a3e; }
+    .copy-btn:active { background: #132e1e; }
+    .copy-status { font-size: 13px; color: #555; min-height: 18px; text-align: center; }
+  </style>
+</head>
+<body>
+
+<div class="form-panel">
+  <h1>판매 보고서 작성</h1>
+  <div class="section-title">날짜</div>
+  <div class="field">
+    <input type="date" id="report-date" oninput="updatePreview()">
+  </div>
+  <div class="section-title">제품 목록</div>
+  <div id="products-container"></div>
+  <button class="btn-add-product" onclick="addProduct()">+ 제품 추가</button>
+</div>
+
+<div class="preview-panel">
+  <div id="report-card">
+    <div class="rc-header">
+      <div class="rc-date" id="preview-date">날짜를 선택하세요</div>
+      <div class="rc-title">샌드위치정거장</div>
+      <div class="rc-sub">판매량 &amp; 매진 시각</div>
+    </div>
+    <div id="preview-stats" class="rc-stats"></div>
+    <div class="rc-tl-wrap">
+      <div class="rc-tl-title">일시품절 현황</div>
+      <div id="preview-timeline"></div>
+    </div>
+  </div>
+
+  <button class="copy-btn" onclick="copyToClipboard()">클립보드에 복사</button>
+  <div class="copy-status" id="copy-status"></div>
+</div>
+
+<script>
+  const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
+
+  const COLORS = ['#c94a4a', '#d97c3a', '#c9a830', '#5b9bd5', '#70ad47', '#9b59b6', '#e07070'];
+
+  let products = [
+    { name: '멕시칠리핫독', quantity: '', soldoutTime: '', oos: [] },
+    { name: '야끼소바빵',   quantity: '', soldoutTime: '', oos: [] },
+    { name: '애플브리치즈', quantity: '', soldoutTime: '', oos: [] },
+  ];
+
+  function rgba(hex, a) {
+    const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i+2), 16));
+    return `rgba(${r},${g},${b},${a})`;
+  }
+
+  function escHtml(s) {
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+  }
+
+  function parseMin(t) {
+    if (!t) return null;
+    const s = String(t).replace(/\D/g, '');
+    if (s.length < 3 || s.length > 4) return null;
+    const p = s.padStart(4, '0');
+    const h = parseInt(p.slice(0, 2), 10);
+    const m = parseInt(p.slice(2, 4), 10);
+    if (h > 23 || m > 59) return null;
+    return h * 60 + m;
+  }
+
+  function fmt(t) {
+    const min = parseMin(t);
+    if (min === null) return '';
+    return `${String(Math.floor(min/60)).padStart(2,'0')}:${String(min%60).padStart(2,'0')}`;
+  }
+
+  function renderForm() {
+    const c = document.getElementById('products-container');
+    c.innerHTML = '';
+    products.forEach((p, pi) => {
+      const color = COLORS[pi % COLORS.length];
+      const div = document.createElement('div');
+      div.className = 'product-card';
+      div.innerHTML = `
+        <div class="product-card-header">
+          <span class="label">
+            <span class="color-dot" style="background:${color}"></span>제품 ${pi + 1}
+          </span>
+          <button class="btn btn-del" onclick="removeProduct(${pi})">삭제</button>
+        </div>
+        <div class="field">
+          <label>제품명</label>
+          <input type="text" value="${escHtml(p.name)}"
+            oninput="products[${pi}].name=this.value;updatePreview()" placeholder="제품명">
+        </div>
+        <div class="row">
+          <div class="field">
+            <label>판매량</label>
+            <input type="number" value="${p.quantity}"
+              oninput="products[${pi}].quantity=this.value;updatePreview()" placeholder="0" min="0">
+          </div>
+          <div class="field">
+            <label>매진</label>
+            <input type="text" class="t-input" value="${p.soldoutTime}" maxlength="4" placeholder="0000"
+              oninput="products[${pi}].soldoutTime=this.value;updatePreview()">
+          </div>
+        </div>
+        <div>
+          <label style="font-size:12px;color:#666;margin-bottom:4px;display:block">일시품절</label>
+          <div class="oos-list">
+            ${p.oos.map((o, oi) => `
+              <div class="oos-entry">
+                <input type="text" class="t-input" value="${o.start}" maxlength="4" placeholder="0000"
+                  oninput="products[${pi}].oos[${oi}].start=this.value;updatePreview()">
+                <span class="oos-sep">~</span>
+                <input type="text" class="t-input" value="${o.end}" maxlength="4" placeholder="0000"
+                  oninput="products[${pi}].oos[${oi}].end=this.value;updatePreview()">
+                <button class="btn btn-del" onclick="removeOos(${pi},${oi})">✕</button>
+              </div>`).join('')}
+          </div>
+          <button class="btn btn-add-oos" onclick="addOos(${pi})">+ 일시품절 추가</button>
+        </div>`;
+      c.appendChild(div);
+    });
+  }
+
+  function addProduct()          { products.push({name:'',quantity:'',soldoutTime:'',oos:[]}); renderForm(); updatePreview(); }
+  function removeProduct(pi)     { products.splice(pi,1); renderForm(); updatePreview(); }
+  function addOos(pi)            { products[pi].oos.push({start:'',end:''}); renderForm(); updatePreview(); }
+  function removeOos(pi, oi)     { products[pi].oos.splice(oi,1); renderForm(); updatePreview(); }
+
+  function computeRange() {
+    return { start: 8 * 60, end: 22 * 60 };
+  }
+
+  function updatePreview() {
+    // Date header
+    const dv = document.getElementById('report-date').value;
+    if (dv) {
+      const d = new Date(dv + 'T00:00:00');
+      document.getElementById('preview-date').textContent =
+        `${d.getMonth()+1}/${d.getDate()} ${DAYS[d.getDay()]}`;
+    }
+
+    // Stats strip
+    document.getElementById('preview-stats').innerHTML = products.map((p, pi) => {
+      const color = COLORS[pi % COLORS.length];
+      const qty = p.quantity !== '' ? Number(p.quantity).toLocaleString('ko-KR') : '—';
+      const badge = p.soldoutTime ? `<div class="rc-stat-badge">${fmt(p.soldoutTime)} 매진</div>` : '';
+      const oosText = p.oos
+        .filter(o => parseMin(o.start) !== null && parseMin(o.end) !== null)
+        .map(o => `${fmt(o.start)}-${fmt(o.end)}`)
+        .join('  /  ');
+      const oosList = oosText ? `<div class="rc-stat-oos">${oosText} 일시품절</div>` : '';
+      return `<div class="rc-stat-col">
+        <div class="rc-stat-name">
+          <span class="dot" style="background:${color}"></span>
+          ${escHtml(p.name || '?')}
+        </div>
+        <div class="rc-stat-qty">${qty}</div>
+        ${badge}
+        ${oosList}
+      </div>`;
+    }).join('');
+
+    // Timeline
+    const { start, end } = computeRange();
+    const SLOT = 15;
+    const totalSlots = (end - start) / SLOT;
+
+    let html = '<table class="tl-table"><thead><tr><th class="tl-th-time"></th>';
+    products.forEach((p, pi) => {
+      const color = COLORS[pi % COLORS.length];
+      html += `<th><span style="display:inline-block;width:8px;height:8px;border-radius:2px;background:${color};vertical-align:middle;margin-right:3px;"></span>${escHtml(p.name||'?')}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+
+    for (let s = 0; s < totalSlots; s++) {
+      const t = start + s * SLOT;
+      const h = Math.floor(t / 60), m = t % 60;
+      const label = (m === 0 || m === 30) ? `${String(h).padStart(2,'0')}${String(m).padStart(2,'0')}` : '';
+
+      html += '<tr class="tl-row">';
+      html += `<td class="tl-td-time">${label}</td>`;
+
+      products.forEach((p, pi) => {
+        const color = COLORS[pi % COLORS.length];
+        const inOos = p.oos.some(o => {
+          const os = parseMin(o.start), oe = parseMin(o.end);
+          return os !== null && oe !== null && t >= os && t < oe;
+        });
+        const soldMin = parseMin(p.soldoutTime);
+        const afterSoldout = soldMin !== null && soldMin < end && t + SLOT > soldMin;
+        const bg = (inOos || afterSoldout) ? rgba(color, 0.55) : '';
+        html += `<td class="tl-td-cell" style="background:${bg}"></td>`;
+      });
+
+      html += '</tr>';
+    }
+
+    html += '</tbody></table>';
+    document.getElementById('preview-timeline').innerHTML = html;
+  }
+
+  async function copyToClipboard() {
+    const status = document.getElementById('copy-status');
+    status.textContent = '이미지 생성 중...';
+    try {
+      const canvas = await html2canvas(document.getElementById('report-card'), {
+        scale: 2.5, backgroundColor: '#ffffff', useCORS: true, logging: false,
+      });
+      canvas.toBlob(async blob => {
+        try {
+          await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
+          status.textContent = '✅ 복사 완료! 카카오톡에 붙여넣기 하세요.';
+          setTimeout(() => { status.textContent = ''; }, 4000);
+        } catch {
+          const a = Object.assign(document.createElement('a'), {
+            href: URL.createObjectURL(blob),
+            download: `판매보고서_${document.getElementById('report-date').value||'report'}.png`,
+          });
+          a.click();
+          status.textContent = '⬇️ 클립보드 대신 파일로 저장되었습니다.';
+        }
+      }, 'image/png');
+    } catch (e) {
+      status.textContent = '❌ 오류: ' + e.message;
+    }
+  }
+
+  // Init
+  const t = new Date();
+  document.getElementById('report-date').value =
+    `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+  renderForm();
+  updatePreview();
+</script>
+</body>
+</html>
