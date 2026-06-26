@@ -2,8 +2,8 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>샌드위치정거장 판매량 & 매진 시각</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+  <title>샌드위치정거장 판매 보고서</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -13,6 +13,24 @@
       min-height: 100vh;
       display: flex;
     }
+
+    /* ─── 탭바 (모바일 전용) ─── */
+    .tab-bar {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0;
+      z-index: 100;
+      background: #fff;
+      border-bottom: 1px solid #e0e0e0;
+    }
+    .tab-btn {
+      flex: 1; padding: 14px; border: none; background: none;
+      font-size: 15px; font-weight: 700; color: #bbb;
+      cursor: pointer; font-family: inherit;
+      border-bottom: 3px solid transparent;
+      transition: color .15s, border-color .15s;
+    }
+    .tab-btn.active { color: #1b3d2a; border-bottom-color: #1b3d2a; }
 
     /* ─── Form Panel ─── */
     .form-panel {
@@ -81,24 +99,13 @@
       overflow: hidden;
       box-shadow: 0 6px 32px rgba(0,0,0,0.13);
     }
-
-    .rc-header {
-      background: #1b3d2a; padding: 22px 28px 18px; color: #fff;
-    }
+    .rc-header { background: #1b3d2a; padding: 22px 28px 18px; color: #fff; }
     .rc-date { font-size: 13px; opacity: .65; margin-bottom: 3px; }
     .rc-title { font-size: 20px; font-weight: 800; letter-spacing: -.3px; }
     .rc-sub { font-size: 12px; opacity: .5; margin-top: 3px; }
 
-    /* Stats strip */
-    .rc-stats {
-      display: flex;
-      border-bottom: 1px solid #f0f0f0;
-    }
-    .rc-stat-col {
-      flex: 1;
-      padding: 12px 14px;
-      border-right: 1px solid #f0f0f0;
-    }
+    .rc-stats { display: flex; border-bottom: 1px solid #f0f0f0; }
+    .rc-stat-col { flex: 1; padding: 12px 14px; border-right: 1px solid #f0f0f0; }
     .rc-stat-col:last-child { border-right: none; }
     .rc-stat-name {
       font-size: 13px; font-weight: 700; color: #999; margin-bottom: 6px;
@@ -111,23 +118,16 @@
       font-size: 17px; font-weight: 700; padding: 6px 16px;
       border-radius: 20px; margin-top: 10px;
     }
-    .rc-stat-oos {
-      font-size: 14px; font-weight: 700; color: #aaa; margin-top: 8px;
-    }
+    .rc-stat-oos { font-size: 14px; font-weight: 700; color: #aaa; margin-top: 8px; }
 
-    /* Timeline */
     .rc-tl-wrap { padding: 16px 22px 22px; }
     .rc-tl-title {
       font-size: 10px; font-weight: 700; color: #bbb;
       letter-spacing: .08em; text-transform: uppercase; margin-bottom: 10px;
     }
-
     .tl-table { width: 100%; border-collapse: collapse; table-layout: fixed; }
     .tl-th-time { width: 38px; }
-    .tl-table thead th {
-      font-size: 10px; color: #666; font-weight: 600;
-      padding-bottom: 6px; text-align: center;
-    }
+    .tl-table thead th { font-size: 10px; color: #666; font-weight: 600; padding-bottom: 6px; text-align: center; }
     .tl-row td { height: 6px; }
     .tl-td-time {
       font-size: 8px; color: #ccc; text-align: right;
@@ -136,7 +136,7 @@
     }
     .tl-td-cell { border: 0.5px solid rgba(0,0,0,0.05); }
 
-    /* Copy button */
+    /* ─── Copy button ─── */
     .copy-btn {
       background: #1b3d2a; color: #fff; border: none; border-radius: 12px;
       padding: 15px 40px; font-size: 15px; font-weight: 700;
@@ -145,11 +145,88 @@
     .copy-btn:hover { background: #2a5a3e; }
     .copy-btn:active { background: #132e1e; }
     .copy-status { font-size: 13px; color: #555; min-height: 18px; text-align: center; }
+
+    /* ─── 모바일 ─── */
+    @media (max-width: 768px) {
+      body { flex-direction: column; background: #fff; }
+
+      .tab-bar { display: flex; }
+
+      .form-panel {
+        width: 100%; min-width: unset;
+        height: auto; min-height: calc(100vh - 50px);
+        border-right: none;
+        padding: 20px 16px 100px;
+        margin-top: 50px;
+      }
+      .form-panel.hidden { display: none; }
+
+      .preview-panel {
+        flex: unset; width: 100%;
+        padding: 16px 12px 100px;
+        margin-top: 50px;
+        gap: 16px;
+      }
+      .preview-panel.hidden { display: none; }
+
+      #report-card {
+        width: 100%;
+        border-radius: 12px;
+        box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+      }
+
+      .copy-btn {
+        width: 100%; padding: 16px;
+        border-radius: 12px; font-size: 16px;
+        position: fixed; bottom: 0; left: 0; right: 0;
+        border-radius: 0;
+      }
+      .copy-status {
+        position: fixed; bottom: 56px; left: 0; right: 0;
+        background: rgba(255,255,255,0.95);
+        padding: 8px 16px; text-align: center;
+        font-size: 13px;
+      }
+
+      /* 폼 터치 친화적 */
+      input[type="text"],
+      input[type="number"],
+      input[type="date"] {
+        padding: 12px 12px; font-size: 16px;
+      }
+      .t-input {
+        width: 80px !important; padding: 12px 8px;
+        font-size: 17px;
+      }
+      .field label { font-size: 13px; margin-bottom: 6px; }
+      .btn { padding: 8px 14px; font-size: 13px; }
+      .btn-add-oos { padding: 10px 14px; }
+      .btn-add-product { padding: 14px; font-size: 14px; }
+      .form-panel h1 { font-size: 20px; margin-bottom: 20px; }
+      .section-title { margin: 24px 0 12px; }
+
+      /* 리포트 카드 — 작은 화면에 맞게 */
+      .rc-header { padding: 18px 20px 14px; }
+      .rc-title { font-size: 18px; }
+      .rc-stat-col { padding: 10px 10px; }
+      .rc-stat-qty { font-size: 22px; }
+      .rc-stat-badge { font-size: 14px; padding: 5px 12px; }
+      .rc-stat-oos { font-size: 12px; }
+      .rc-stat-name { font-size: 11px; }
+      .rc-tl-wrap { padding: 12px 14px 16px; }
+      .tl-th-time { width: 30px; }
+      .tl-table thead th { font-size: 9px; }
+    }
   </style>
 </head>
 <body>
 
-<div class="form-panel">
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('form')">입력</button>
+  <button class="tab-btn" onclick="switchTab('preview')">미리보기</button>
+</div>
+
+<div class="form-panel" id="panel-form">
   <h1>판매 보고서 작성</h1>
   <div class="section-title">날짜</div>
   <div class="field">
@@ -160,7 +237,7 @@
   <button class="btn-add-product" onclick="addProduct()">+ 제품 추가</button>
 </div>
 
-<div class="preview-panel">
+<div class="preview-panel hidden" id="panel-preview">
   <div id="report-card">
     <div class="rc-header">
       <div class="rc-date" id="preview-date">날짜를 선택하세요</div>
@@ -173,14 +250,12 @@
       <div id="preview-timeline"></div>
     </div>
   </div>
-
   <button class="copy-btn" onclick="copyToClipboard()">클립보드에 복사</button>
   <div class="copy-status" id="copy-status"></div>
 </div>
 
 <script>
   const DAYS = ['일', '월', '화', '수', '목', '금', '토'];
-
   const COLORS = ['#c94a4a', '#d97c3a', '#c9a830', '#5b9bd5', '#70ad47', '#9b59b6', '#e07070'];
 
   let products = [
@@ -188,6 +263,15 @@
     { name: '야끼소바빵',   quantity: '', soldoutTime: '', oos: [] },
     { name: '애플브리치즈', quantity: '', soldoutTime: '', oos: [] },
   ];
+
+  const isMobile = () => window.innerWidth <= 768;
+
+  function switchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelector(`.tab-btn:nth-child(${tab === 'form' ? 1 : 2})`).classList.add('active');
+    document.getElementById('panel-form').classList.toggle('hidden', tab !== 'form');
+    document.getElementById('panel-preview').classList.toggle('hidden', tab !== 'preview');
+  }
 
   function rgba(hex, a) {
     const [r, g, b] = [1, 3, 5].map(i => parseInt(hex.slice(i, i+2), 16));
@@ -265,17 +349,14 @@
     });
   }
 
-  function addProduct()          { products.push({name:'',quantity:'',soldoutTime:'',oos:[]}); renderForm(); updatePreview(); }
-  function removeProduct(pi)     { products.splice(pi,1); renderForm(); updatePreview(); }
-  function addOos(pi)            { products[pi].oos.push({start:'',end:''}); renderForm(); updatePreview(); }
-  function removeOos(pi, oi)     { products[pi].oos.splice(oi,1); renderForm(); updatePreview(); }
+  function addProduct()       { products.push({name:'',quantity:'',soldoutTime:'',oos:[]}); renderForm(); updatePreview(); }
+  function removeProduct(pi)  { products.splice(pi,1); renderForm(); updatePreview(); }
+  function addOos(pi)         { products[pi].oos.push({start:'',end:''}); renderForm(); updatePreview(); }
+  function removeOos(pi, oi)  { products[pi].oos.splice(oi,1); renderForm(); updatePreview(); }
 
-  function computeRange() {
-    return { start: 8 * 60, end: 22 * 60 };
-  }
+  function computeRange() { return { start: 8 * 60, end: 22 * 60 }; }
 
   function updatePreview() {
-    // Date header
     const dv = document.getElementById('report-date').value;
     if (dv) {
       const d = new Date(dv + 'T00:00:00');
@@ -283,7 +364,6 @@
         `${d.getMonth()+1}/${d.getDate()} ${DAYS[d.getDay()]}`;
     }
 
-    // Stats strip
     document.getElementById('preview-stats').innerHTML = products.map((p, pi) => {
       const color = COLORS[pi % COLORS.length];
       const qty = p.quantity !== '' ? Number(p.quantity).toLocaleString('ko-KR') : '—';
@@ -294,16 +374,13 @@
         .join('');
       return `<div class="rc-stat-col">
         <div class="rc-stat-name">
-          <span class="dot" style="background:${color}"></span>
-          ${escHtml(p.name || '?')}
+          <span class="dot" style="background:${color}"></span>${escHtml(p.name || '?')}
         </div>
         <div class="rc-stat-qty">${qty}</div>
-        ${badge}
-        ${oosList}
+        ${badge}${oosList}
       </div>`;
     }).join('');
 
-    // Timeline
     const { start, end } = computeRange();
     const SLOT = 15;
     const totalSlots = (end - start) / SLOT;
@@ -372,6 +449,12 @@
   const t = new Date();
   document.getElementById('report-date').value =
     `${t.getFullYear()}-${String(t.getMonth()+1).padStart(2,'0')}-${String(t.getDate()).padStart(2,'0')}`;
+
+  // 데스크탑에서는 미리보기 패널 항상 표시
+  if (!isMobile()) {
+    document.getElementById('panel-preview').classList.remove('hidden');
+  }
+
   renderForm();
   updatePreview();
 </script>
