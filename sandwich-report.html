@@ -288,11 +288,10 @@
       const color = COLORS[pi % COLORS.length];
       const qty = p.quantity !== '' ? Number(p.quantity).toLocaleString('ko-KR') : '—';
       const badge = p.soldoutTime ? `<div class="rc-stat-badge">${fmt(p.soldoutTime)} 매진</div>` : '';
-      const oosText = p.oos
+      const oosList = p.oos
         .filter(o => parseMin(o.start) !== null && parseMin(o.end) !== null)
-        .map(o => `${fmt(o.start)}-${fmt(o.end)}`)
-        .join('  /  ');
-      const oosList = oosText ? `<div class="rc-stat-oos">${oosText} 일시품절</div>` : '';
+        .map(o => `<div class="rc-stat-oos">${fmt(o.start)}-${fmt(o.end)} 일시품절</div>`)
+        .join('');
       return `<div class="rc-stat-col">
         <div class="rc-stat-name">
           <span class="dot" style="background:${color}"></span>
