@@ -422,24 +422,43 @@
   async function copyToClipboard() {
     const status = document.getElementById('copy-status');
     status.textContent = '이미지 생성 중...';
+    const dateStr = document.getElementById('report-date').value || 'report';
+
     try {
       const canvas = await html2canvas(document.getElementById('report-card'), {
         scale: 2.5, backgroundColor: '#ffffff', useCORS: true, logging: false,
       });
+
       canvas.toBlob(async blob => {
+        // 1. 클립보드 복사 (데스크탑 Chrome / Safari)
         try {
           await navigator.clipboard.write([new ClipboardItem({'image/png': blob})]);
           status.textContent = '✅ 복사 완료! 카카오톡에 붙여넣기 하세요.';
           setTimeout(() => { status.textContent = ''; }, 4000);
-        } catch {
-          const a = Object.assign(document.createElement('a'), {
-            href: URL.createObjectURL(blob),
-            download: `판매보고서_${document.getElementById('report-date').value||'report'}.png`,
-          });
-          a.click();
-          status.textContent = '⬇️ 클립보드 대신 파일로 저장되었습니다.';
+          return;
+        } catch {}
+
+        // 2. 네이티브 공유 시트 (모바일 iOS / Android)
+        const file = new File([blob], `판매보고서_${dateStr}.png`, { type: 'image/png' });
+        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          try {
+            await navigator.share({ files: [file], title: `판매보고서 ${dateStr}` });
+            status.textContent = '';
+            return;
+          } catch (e) {
+            if (e.name === 'AbortError') { status.textContent = ''; return; }
+          }
         }
+
+        // 3. 마지막 수단: 다운로드
+        const a = Object.assign(document.createElement('a'), {
+          href: URL.createObjectURL(blob),
+          download: `판매보고서_${dateStr}.png`,
+        });
+        a.click();
+        status.textContent = '⬇️ 저장된 이미지를 카카오톡에서 불러오세요.';
       }, 'image/png');
+
     } catch (e) {
       status.textContent = '❌ 오류: ' + e.message;
     }
