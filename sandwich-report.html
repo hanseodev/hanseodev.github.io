@@ -692,7 +692,17 @@
       }
 
       function computeRange() {
-        return { start: 8 * 60, end: 22 * 60 };
+        const start = 8 * 60;
+        let end = 20 * 60; // 기본 20:00
+        products.forEach(p => {
+          const soldMin = parseMin(p.soldoutTime);
+          // 매진 시각이 현재 end 이상이면, 그 다음 15분 슬롯까지 확장
+          // (+1로 soldMin < end 조건이 항상 성립하게 해 기존 색칠 로직 유지)
+          if (soldMin !== null && soldMin >= end) {
+            end = Math.ceil((soldMin + 1) / 15) * 15;
+          }
+        });
+        return { start, end };
       }
 
       function updatePreview() {
@@ -805,21 +815,30 @@
             type: "image/png",
           });
 
-          // 1. 네이티브 공유 시트 우선 (모바일 Android / iOS)
-          if (navigator.canShare && navigator.canShare({ files: [file] })) {
+          // 터치 기기(모바일) 여부 — canShare 체크 없이 share() 직접 시도
+          const onMobile = navigator.maxTouchPoints > 0 || "ontouchstart" in window;
+
+          if (onMobile && navigator.share) {
+            // 모바일: 공유 시트만 사용, 클립보드로 절대 넘어가지 않음
             try {
               await navigator.share({ files: [file] });
-              status.textContent = "";
-              return;
             } catch (e) {
-              if (e.name === "AbortError") {
-                status.textContent = "";
+              if (e.name !== "AbortError") {
+                // 파일 공유 미지원 기기: 다운로드 후 갤러리에서 공유 안내
+                const a = Object.assign(document.createElement("a"), {
+                  href: URL.createObjectURL(blob),
+                  download: `판매보고서_${dateStr}.png`,
+                });
+                a.click();
+                status.textContent = "⬇️ 이미지를 갤러리에서 카카오톡으로 공유해주세요.";
                 return;
               }
             }
+            status.textContent = "";
+            return;
           }
 
-          // 2. 클립보드 복사 (데스크탑 Chrome / Safari)
+          // 데스크탑: 클립보드 복사
           try {
             await navigator.clipboard.write([
               new ClipboardItem({ "image/png": blob }),
@@ -831,7 +850,7 @@
             return;
           } catch {}
 
-          // 3. 마지막 수단: 다운로드
+          // 최종 폴백: 다운로드
           const a = Object.assign(document.createElement("a"), {
             href: URL.createObjectURL(blob),
             download: `판매보고서_${dateStr}.png`,
