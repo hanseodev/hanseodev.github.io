@@ -354,7 +354,7 @@
         border: 0.5px solid rgba(0, 0, 0, 0.05);
       }
 
-      /* ─── Copy button ─── */
+      /* ─── Buttons ─── */
       .copy-btn {
         background: #1b3d2a;
         color: #fff;
@@ -367,12 +367,19 @@
         font-family: inherit;
         transition: background 0.15s;
       }
-      .copy-btn:hover {
-        background: #2a5a3e;
+      .copy-btn:hover { background: #2a5a3e; }
+      .copy-btn:active { background: #132e1e; }
+      .btn-save { background: #2d6b48; }
+      .btn-save:hover { background: #357d56; }
+      .btn-save:active { background: #1f4d33; }
+
+      /* 모바일 두 버튼 row — 데스크탑에서는 숨김 */
+      .btn-row {
+        display: none;
       }
-      .copy-btn:active {
-        background: #132e1e;
-      }
+      /* 데스크탑 단독 버튼 */
+      .btn-desktop { display: block; }
+
       .copy-status {
         font-size: 13px;
         color: #333;
@@ -421,17 +428,26 @@
           box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
         }
 
-        .copy-btn {
-          width: 100%;
-          padding: 16px;
-          border-radius: 12px;
-          font-size: 16px;
+        /* 모바일: 두 버튼 row를 하단 고정 */
+        .btn-row {
+          display: flex;
           position: fixed;
-          bottom: 0;
-          left: 0;
-          right: 0;
-          border-radius: 0;
+          bottom: 0; left: 0; right: 0;
+          z-index: 200;
         }
+        .btn-row .copy-btn {
+          flex: 1;
+          padding: 17px 10px;
+          font-size: 15px;
+          border-radius: 0;
+          width: auto;
+        }
+        .btn-row .btn-save {
+          border-left: 1px solid rgba(255,255,255,0.2);
+        }
+        /* 데스크탑 버튼 모바일에서 숨김 */
+        .btn-desktop { display: none !important; }
+
         .copy-status {
           position: fixed;
           bottom: 56px;
@@ -545,7 +561,13 @@
           <div id="preview-timeline"></div>
         </div>
       </div>
-      <button class="copy-btn" onclick="copyToClipboard()">공유하기</button>
+      <!-- 모바일: 공유 + 저장 두 버튼 -->
+      <div class="btn-row">
+        <button class="copy-btn" onclick="shareImage()">공유하기</button>
+        <button class="copy-btn btn-save" onclick="saveImage()">이미지 저장</button>
+      </div>
+      <!-- 데스크탑: 클립보드 복사 -->
+      <button class="copy-btn btn-desktop" onclick="copyToClipboard()">클립보드에 복사</button>
       <div class="copy-status" id="copy-status"></div>
     </div>
 
@@ -807,66 +829,85 @@
         document.getElementById("preview-timeline").innerHTML = html;
       }
 
+      // 공통: blob 가져오기 (캐시 우선)
+      async function getBlob() {
+        if (_prerenderedBlob) return _prerenderedBlob;
+        const canvas = await html2canvas(
+          document.getElementById("report-card"),
+          { scale: 2.5, backgroundColor: "#ffffff", useCORS: true, logging: false },
+        );
+        return await new Promise((r) => canvas.toBlob(r, "image/png"));
+      }
+
+      // 모바일 공유하기 버튼
+      async function shareImage() {
+        const status = document.getElementById("copy-status");
+        const dateStr = document.getElementById("report-date").value || "report";
+
+        // blob이 아직 없으면 백그라운드 생성 후 재시도 안내
+        if (!_prerenderedBlob) {
+          status.textContent = "이미지 준비 중... 잠시 후 다시 눌러주세요.";
+          prerenderBlob().then(() => {
+            status.textContent = "준비됐어요! 공유하기를 다시 눌러주세요.";
+            setTimeout(() => { status.textContent = ""; }, 4000);
+          });
+          return;
+        }
+
+        const file = new File([_prerenderedBlob], `판매보고서_${dateStr}.png`, { type: "image/png" });
+        try {
+          await navigator.share({ files: [file] });
+          status.textContent = "";
+        } catch (e) {
+          if (e.name !== "AbortError") {
+            status.textContent = "공유 실패. 이미지 저장 버튼을 이용해주세요.";
+          } else {
+            status.textContent = "";
+          }
+        }
+      }
+
+      // 모바일 이미지 저장 버튼
+      async function saveImage() {
+        const status = document.getElementById("copy-status");
+        const dateStr = document.getElementById("report-date").value || "report";
+        status.textContent = "이미지 생성 중...";
+        try {
+          const blob = await getBlob();
+          Object.assign(document.createElement("a"), {
+            href: URL.createObjectURL(blob),
+            download: `판매보고서_${dateStr}.png`,
+          }).click();
+          status.textContent = "⬇️ 저장 완료! 갤러리에서 카카오톡으로 공유하세요.";
+          setTimeout(() => { status.textContent = ""; }, 4000);
+        } catch (e) {
+          status.textContent = "❌ 오류: " + e.message;
+        }
+      }
+
+      // 데스크탑 클립보드 복사
       async function copyToClipboard() {
         const status = document.getElementById("copy-status");
         const dateStr = document.getElementById("report-date").value || "report";
-        const onMobile = navigator.maxTouchPoints > 0 || "ontouchstart" in window;
-
-        // 캐시된 blob이 있으면 바로 사용 (비동기 없음 → 제스처 컨텍스트 100% 유지)
-        let blob = _prerenderedBlob;
-
-        if (!blob) {
-          status.textContent = "이미지 생성 중...";
-          try {
-            const canvas = await html2canvas(
-              document.getElementById("report-card"),
-              { scale: 2.5, backgroundColor: "#ffffff", useCORS: true, logging: false },
-            );
-            blob = await new Promise((r) => canvas.toBlob(r, "image/png"));
-          } catch (e) {
-            status.textContent = "❌ 오류: " + e.message;
-            return;
-          }
-        }
-
-        const file = new File([blob], `판매보고서_${dateStr}.png`, { type: "image/png" });
-
-        if (onMobile && navigator.share) {
-          const t0 = Date.now();
-          try {
-            await navigator.share({ files: [file] });
-            status.textContent = "";
-          } catch (e) {
-            const immediate = Date.now() - t0 < 800; // 즉시 에러 = 브라우저 거부
-            if (e.name === "AbortError" && !immediate) {
-              // 사용자가 직접 공유 취소
-              status.textContent = "";
-            } else {
-              // 브라우저가 거부하거나 제스처 만료 → 다운로드 폴백
-              Object.assign(document.createElement("a"), {
-                href: URL.createObjectURL(blob),
-                download: `판매보고서_${dateStr}.png`,
-              }).click();
-              status.textContent = "⬇️ 이미지를 갤러리에서 카카오톡으로 공유해주세요.";
-            }
-          }
-          return;
-        }
-
-        // 데스크탑: 클립보드
+        status.textContent = "이미지 생성 중...";
         try {
+          const blob = await getBlob();
           await navigator.clipboard.write([new ClipboardItem({ "image/png": blob })]);
           status.textContent = "✅ 복사 완료! 카카오톡에 붙여넣기 하세요.";
           setTimeout(() => { status.textContent = ""; }, 4000);
-          return;
-        } catch {}
-
-        // 최종 폴백: 다운로드
-        Object.assign(document.createElement("a"), {
-          href: URL.createObjectURL(blob),
-          download: `판매보고서_${dateStr}.png`,
-        }).click();
-        status.textContent = "⬇️ 저장된 이미지를 카카오톡에서 불러오세요.";
+        } catch {
+          // 클립보드 실패 시 다운로드
+          try {
+            const blob = await getBlob();
+            Object.assign(document.createElement("a"), {
+              href: URL.createObjectURL(blob),
+              download: `판매보고서_${dateStr}.png`,
+            }).click();
+            status.textContent = "⬇️ 저장된 이미지를 카카오톡에서 불러오세요.";
+          } catch (e) {
+            status.textContent = "❌ 오류: " + e.message;
+          }
+        }
       }
 
       // Init
